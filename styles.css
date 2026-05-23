@@ -189,13 +189,15 @@ main {
 
 /* 運動入力行 */
 .exercise-row {
-  display: grid;
-  grid-template-columns: 1fr 72px 48px auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   margin-bottom: 8px;
 }
-.exercise-row select,
-.exercise-row input { padding: 10px 8px; font-size: 16px; }
+.exercise-row select { flex: 1; min-width: 100px; padding: 10px 8px; font-size: 16px; }
+.exercise-row #exercise-value { width: 72px; flex-shrink: 0; padding: 10px 8px; font-size: 16px; }
+.exercise-row #unit-toggle { flex-shrink: 0; }
+.exercise-row #add-exercise { width: 100%; margin: 0; }
 
 .unit-btn {
   min-width: 48px;
@@ -252,8 +254,7 @@ main {
   margin-right: 2px;
 }
 
-/* 食事入力行（1行目：タイミング＋食べ物名＋kcal、……………………………………
-          2行目：追加ボタン） */
+/* 食事入力行 */
 .meal-row {
   display: flex;
   flex-wrap: wrap;
