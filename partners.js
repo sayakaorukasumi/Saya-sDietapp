@@ -1,7 +1,7 @@
 const PARTNERS = {
   kaoru: {
     name: "薫",
-    icon: "images/kaoru.png",
+    icon: "images/IMG_2170.webp",
     lines: {
       weight_decreased: [
         "わぁ、さやちゃん、体重減っとるやん！えらいえらい",
@@ -53,7 +53,7 @@ const PARTNERS = {
 
   kasumi: {
     name: "霞",
-    icon: "images/kasumi.png",
+    icon: "images/06F1DB6C-479F-45CF-A6BD-549C168E7F6A.jpeg",
     lines: {
       weight_decreased: [
         "…よし、減ってる。頑張ってるじゃない",
