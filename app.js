@@ -117,11 +117,11 @@ function bindEvents() {
   document.getElementById("date-input").addEventListener("change", e => loadDateData(e.target.value));
 
   document.getElementById("add-exercise").addEventListener("click", () => {
-    const name  = document.getElementById("exercise-select").value;
-    const value = parseInt(document.getElementById("exercise-value").value);
+    const name    = document.getElementById("exercise-select").value;
+    const value   = parseInt(document.getElementById("exercise-value").value);
     if (!name || !value || value <= 0) { alert("種目と数値を入れてね"); return; }
-    const weight = getCurrentWeight();
-    const kcal   = calcKcal({ name, value, unit: currentUnit }, weight);
+    const weight  = getCurrentWeight();
+    const kcal    = calcKcal({ name, value, unit: currentUnit }, weight);
     pendingExercises.push({ name, value, unit: currentUnit, kcal });
     document.getElementById("exercise-value").value = "";
     renderExerciseList();
@@ -159,7 +159,8 @@ function renderExerciseList() {
   ul.innerHTML = pendingExercises.map((e, i) => {
     const unitLabel = e.unit === "rep" ? "回" : "分";
     const kcal = e.kcal ?? calcKcal(e, weight);
-    const kcalHtml = kcal != null ? `<span class="kcal-badge">約${kcal}kcal</span>` : "";
+    const kcalHtml = kcal != null
+      ? `<span class="kcal-badge">約${kcal}kcal</span>` : "";
     return `<li>
       <span>${e.name} ${e.value}${unitLabel} ${kcalHtml}</span>
       <button class="remove" data-i="${i}" aria-label="削除">×</button>
@@ -277,10 +278,10 @@ function renderStreak() {
   const streak = calcStreak(loadRecords());
   document.getElementById("streak-number").textContent = streak;
   const sub = document.getElementById("streak-sub");
-  if      (streak === 0) sub.textContent = "今日運動して、新しい連続記録をスタート！";
-  else if (streak < 7)   sub.textContent = "いい調子！この調子で続けよう";
-  else if (streak < 30)  sub.textContent = "もう習慣になってきてる！";
-  else                   sub.textContent = "すごい継続力…！本当にお疲れさま";
+  if      (streak === 0)  sub.textContent = "今日運動して、新しい連続記録をスタート！";
+  else if (streak < 7)    sub.textContent = "いい調子！この調子で続けよう";
+  else if (streak < 30)   sub.textContent = "もう習慣になってきてる！";
+  else                    sub.textContent = "すごい継続力…！本当にお疲れさま";
 }
 
 let chartInstance = null;
@@ -295,7 +296,8 @@ function renderChart(range = "7") {
   if (range !== "all") {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - parseInt(range) + 1);
-    filtered = all.filter(([d]) => d >= cutoff.toISOString().slice(0,10));
+    const cutoffStr = cutoff.toISOString().slice(0,10);
+    filtered = all.filter(([d]) => d >= cutoffStr);
   }
 
   const labels = filtered.map(([d]) => d.slice(5));
@@ -412,14 +414,13 @@ function renderProfileSummary() {
   }
 
   let boxes = "";
-  if (latestWeight) boxes += summaryBox("最新の体重", latestWeight, "kg", "");
+  if (latestWeight)   boxes += summaryBox("最新の体重", latestWeight, "kg", "");
   if (p.targetWeight) boxes += summaryBox("目標体重", p.targetWeight, "kg", "");
   if (diff !== null) {
-    const sign = diff > 0 ? "+" : "";
-    boxes += summaryBox("目標まで", sign + diff.toFixed(1), "kg", diff <= 0 ? "good" : "caution");
+    boxes += summaryBox("目標まで", (diff > 0 ? "+" : "") + diff.toFixed(1), "kg", diff <= 0 ? "good" : "caution");
   }
   if (p.height) boxes += summaryBox("身長", p.height, "cm", "");
-  if (bmi) boxes += summaryBox("BMI", bmi, "", bmi < 18.5 || bmi >= 25 ? "caution" : "good");
+  if (bmi)      boxes += summaryBox("BMI", bmi, "", bmi < 18.5 || bmi >= 25 ? "caution" : "good");
   el.innerHTML = `<div class="summary-grid">${boxes}</div>`;
 }
 
@@ -431,7 +432,7 @@ function summaryBox(label, value, unit, cls) {
 }
 
 function exportData() {
-  const blob = new Blob([localStorage.getItem(STORAGE_KEY)||"{}"]. {type:"application/json"});
+  const blob = new Blob([localStorage.getItem(STORAGE_KEY) || "{}"], { type: "application/json" });
   const url  = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = `saya-diet-${todayStr()}.json`; a.click();
