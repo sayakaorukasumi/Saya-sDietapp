@@ -1,7 +1,7 @@
-const STORAGE_KEY  = "saya-diet-records";
-const LAST_LINE_KEY = "saya-diet-last-context";
-const PROFILE_KEY  = "saya-diet-profile";
+const STORAGE_KEY = "saya-diet-records";
+const PROFILE_KEY = "saya-diet-profile";
 
+// ---------- ストレージ ----------
 function loadRecords() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
   catch { return {}; }
@@ -14,6 +14,7 @@ function loadProfile() {
 }
 function saveProfile(p) { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }
 
+// ---------- 日付ユーティリティ ----------
 function todayStr() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
@@ -23,11 +24,13 @@ function formatDateJa(s) {
   return `${y}年${parseInt(m)}月${parseInt(d)}日`;
 }
 
+// ---------- 運動データの後方互換 ----------
 function normalizeExercise(ex) {
   if (ex.value != null) return ex;
   return { name: ex.name, value: ex.minutes, unit: "min", kcal: ex.kcal ?? null };
 }
 
+// ---------- カロリー計算 ----------
 function getCurrentWeight() {
   const v = parseFloat(document.getElementById("weight-input").value);
   if (!isNaN(v) && v > 0) return v;
@@ -48,27 +51,34 @@ function calcKcal(ex, weight) {
   return def.met ? Math.round(def.met * weight * (ex.value / 60)) : null;
 }
 
+function getKcalTarget() {
+  const p = loadProfile();
+  if (p.kcalTarget && p.kcalTarget > 0) return p.kcalTarget;
+  const weight = getCurrentWeight() || 60;
+  const height = p.height || 168;
+  const bmr = 10 * weight + 6.25 * height - 5 * 30 - 161;
+  return Math.round(bmr * 1.375 - 350);
+}
+
+// ---------- 状態 ----------
 let pendingExercises = [];
+let pendingMeals = [];
 let currentUnit = "min";
 
+// ---------- 初期化 ----------
 document.addEventListener("DOMContentLoaded", () => {
-  initHeader();
   initTabs();
   initExerciseSelect();
   initUnitToggle();
+  initFoodDatalist();
   initDateInput();
   loadDateData(todayStr());
   bindEvents();
   loadProfileForm();
-  renderAll();
+  renderStatsTab();
 });
 
-function initHeader() {
-  const d = new Date();
-  document.getElementById("today-label").textContent =
-    `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-}
-
+// ---------- タブ ----------
 function initTabs() {
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -76,11 +86,13 @@ function initTabs() {
       document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
+      if (btn.dataset.tab === "stats") renderStatsTab();
       if (btn.dataset.tab === "profile") renderProfileSummary();
     });
   });
 }
 
+// ---------- 単位トグル ----------
 function initUnitToggle() {
   document.getElementById("unit-toggle").addEventListener("click", () => {
     currentUnit = currentUnit === "min" ? "rep" : "min";
@@ -99,6 +111,7 @@ function updateUnitUI() {
   }
 }
 
+// ---------- 運動プルダウン ----------
 function initExerciseSelect() {
   const sel = document.getElementById("exercise-select");
   sel.innerHTML = EXERCISE_OPTIONS.map(e =>
@@ -109,27 +122,40 @@ function initExerciseSelect() {
   });
 }
 
+// ---------- 食事データリスト ----------
+function initFoodDatalist() {
+  const dl = document.getElementById("food-datalist");
+  dl.innerHTML = FOOD_DATABASE.map(f => `<option value="${f.name}">`).join("");
+
+  document.getElementById("food-name-input").addEventListener("input", e => {
+    const match = FOOD_DATABASE.find(f => f.name === e.target.value);
+    if (match) document.getElementById("food-kcal-input").value = match.kcal;
+  });
+}
+
 function initDateInput() {
   document.getElementById("date-input").value = todayStr();
 }
 
+// ---------- イベントバインド ----------
 function bindEvents() {
   document.getElementById("date-input").addEventListener("change", e => loadDateData(e.target.value));
 
   document.getElementById("add-exercise").addEventListener("click", () => {
-    const name    = document.getElementById("exercise-select").value;
-    const value   = parseInt(document.getElementById("exercise-value").value);
+    const name = document.getElementById("exercise-select").value;
+    const value = parseInt(document.getElementById("exercise-value").value);
     if (!name || !value || value <= 0) { alert("種目と数値を入れてね"); return; }
-    const weight  = getCurrentWeight();
-    const kcal    = calcKcal({ name, value, unit: currentUnit }, weight);
+    const kcal = calcKcal({ name, value, unit: currentUnit }, getCurrentWeight());
     pendingExercises.push({ name, value, unit: currentUnit, kcal });
     document.getElementById("exercise-value").value = "";
     renderExerciseList();
   });
 
-  document.getElementById("save-btn").addEventListener("click", saveToday);
-  document.getElementById("refresh-lines").addEventListener("click", () =>
-    showPartnerLines(getLatestContext(), true));
+  document.getElementById("add-food-btn").addEventListener("click", addFood);
+
+  document.getElementById("save-weight-btn").addEventListener("click", saveWeight);
+  document.getElementById("save-exercise-btn").addEventListener("click", saveExercise);
+  document.getElementById("save-food-btn").addEventListener("click", saveMeals);
 
   document.querySelectorAll(".range-btn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -140,27 +166,41 @@ function bindEvents() {
   });
 
   document.getElementById("save-profile-btn").addEventListener("click", saveProfileForm);
+  document.getElementById("auto-calc-kcal-btn").addEventListener("click", autoCalcKcalTarget);
   document.getElementById("export-btn").addEventListener("click", exportData);
   document.getElementById("import-btn").addEventListener("click", () =>
     document.getElementById("import-file").click());
   document.getElementById("import-file").addEventListener("change", importData);
 }
 
+// ---------- 日付データの読み込み ----------
 function loadDateData(dateStr) {
   const r = loadRecords()[dateStr];
   document.getElementById("weight-input").value = r?.weight ?? "";
+
   pendingExercises = r?.exercises ? r.exercises.map(normalizeExercise) : [];
+  pendingMeals = r?.meals ? [...r.meals] : [];
+
   renderExerciseList();
+  renderFoodList();
+  updateCalorieBar();
+  hideAllInlineComments();
 }
 
+function hideAllInlineComments() {
+  ["weight", "exercise", "food"].forEach(zone => {
+    document.getElementById(`partner-comment-${zone}`).hidden = true;
+  });
+}
+
+// ---------- 運動リスト描画 ----------
 function renderExerciseList() {
   const weight = getCurrentWeight();
   const ul = document.getElementById("exercise-list");
   ul.innerHTML = pendingExercises.map((e, i) => {
     const unitLabel = e.unit === "rep" ? "回" : "分";
     const kcal = e.kcal ?? calcKcal(e, weight);
-    const kcalHtml = kcal != null
-      ? `<span class="kcal-badge">約${kcal}kcal</span>` : "";
+    const kcalHtml = kcal != null ? `<span class="kcal-badge">約${kcal}kcal</span>` : "";
     return `<li>
       <span>${e.name} ${e.value}${unitLabel} ${kcalHtml}</span>
       <button class="remove" data-i="${i}" aria-label="削除">×</button>
@@ -174,101 +214,169 @@ function renderExerciseList() {
   });
 }
 
-function saveToday() {
+// ---------- 食事リスト ----------
+function addFood() {
+  const timing = document.getElementById("meal-timing").value;
+  const name = document.getElementById("food-name-input").value.trim();
+  const kcal = parseInt(document.getElementById("food-kcal-input").value);
+  if (!name) { alert("食べたものを入力してね"); return; }
+  if (!kcal || kcal <= 0) { alert("カロリーを入力してね"); return; }
+  pendingMeals.push({ timing, name, kcal });
+  document.getElementById("food-name-input").value = "";
+  document.getElementById("food-kcal-input").value = "";
+  renderFoodList();
+  updateCalorieBar();
+}
+
+function renderFoodList() {
+  const ul = document.getElementById("food-list");
+  ul.innerHTML = pendingMeals.map((m, i) => `<li>
+    <span><span class="timing-badge">${m.timing}</span> ${m.name} <span class="kcal-badge">${m.kcal}kcal</span></span>
+    <button class="remove" data-i="${i}" aria-label="削除">×</button>
+  </li>`).join("");
+  ul.querySelectorAll(".remove").forEach(b => {
+    b.addEventListener("click", () => {
+      pendingMeals.splice(parseInt(b.dataset.i), 1);
+      renderFoodList();
+      updateCalorieBar();
+    });
+  });
+}
+
+function updateCalorieBar() {
+  const total = pendingMeals.reduce((s, m) => s + m.kcal, 0);
+  const target = getKcalTarget();
+  document.getElementById("today-intake-kcal").textContent = total;
+  document.getElementById("target-kcal-label").textContent = target;
+  const pct = Math.min((total / target) * 100, 100);
+  const fill = document.getElementById("calorie-fill");
+  fill.style.width = pct + "%";
+  fill.classList.remove("near", "over");
+  if (total > target) fill.classList.add("over");
+  else if (pct >= 80) fill.classList.add("near");
+}
+
+// ---------- 保存（体重） ----------
+function saveWeight() {
   const dateStr = document.getElementById("date-input").value;
-  const weight  = parseFloat(document.getElementById("weight-input").value);
+  const weight = parseFloat(document.getElementById("weight-input").value);
   if (!dateStr) { alert("日付を入れてね"); return; }
+  if (isNaN(weight) || weight <= 0) { alert("体重を入力してね"); return; }
 
-  const records    = loadRecords();
-  const prevRecord = records[dateStr];
+  const records = loadRecords();
   const isFirstEver = Object.keys(records).length === 0;
-
-  const newRecord = {};
-  if (!isNaN(weight) && weight > 0) newRecord.weight = weight;
-  if (pendingExercises.length > 0) {
-    const w = (!isNaN(weight) && weight > 0) ? weight : getCurrentWeight();
-    newRecord.exercises = pendingExercises.map(e => ({
-      ...e, kcal: e.kcal ?? calcKcal(e, w),
-    }));
-  }
-
-  if (Object.keys(newRecord).length === 0) {
-    if (prevRecord) {
-      delete records[dateStr]; saveRecords(records); renderAll();
-      alert("記録を削除しました");
-    } else {
-      alert("体重か運動、どちらかを入れてね");
-    }
-    return;
-  }
-
-  records[dateStr] = newRecord;
+  if (!records[dateStr]) records[dateStr] = {};
+  records[dateStr].weight = weight;
   saveRecords(records);
 
-  const context = buildContext(records, dateStr, prevRecord, newRecord, isFirstEver);
-  localStorage.setItem(LAST_LINE_KEY, JSON.stringify(context));
-  renderAll();
-  showPartnerLines(context, true);
+  const diff = getWeightDiff(records, dateStr, weight);
+  let category;
+  if (isFirstEver) {
+    category = "first_record";
+  } else if (diff == null) {
+    category = "default";
+  } else if (diff <= -0.1) {
+    category = "weight_decreased";
+  } else if (diff >= 0.1) {
+    category = "weight_increased";
+  } else {
+    category = "weight_same";
+  }
+
+  showInlineComment("weight", category, diff != null ? Math.abs(diff).toFixed(1) : null);
+  renderStatsTab();
 }
 
-function buildContext(records, dateStr, prevRecord, newRecord, isFirstEver) {
-  if (isFirstEver) return { category: "first_record" };
-  const ctx = { category: "default", n: null };
+function getWeightDiff(records, dateStr, weight) {
+  const prevEntries = Object.entries(records)
+    .filter(([d, r]) => d < dateStr && r.weight != null)
+    .sort((a, b) => b[0].localeCompare(a[0]));
+  if (!prevEntries.length) return null;
+  return weight - prevEntries[0][1].weight;
+}
 
-  if (newRecord.weight != null) {
-    const prevWeights = Object.entries(records)
-      .filter(([d,r]) => d < dateStr && r.weight != null)
-      .sort((a,b) => b[0].localeCompare(a[0]));
-    if (prevWeights.length) {
-      const diff = newRecord.weight - prevWeights[0][1].weight;
-      if (diff <= -0.1)      { ctx.category = "weight_decreased"; ctx.n = Math.abs(diff).toFixed(1); }
-      else if (diff >= 0.1)  { ctx.category = "weight_increased"; ctx.n = diff.toFixed(1); }
-      else                   { ctx.category = "weight_same"; }
-    }
-  }
+// ---------- 保存（運動） ----------
+function saveExercise() {
+  const dateStr = document.getElementById("date-input").value;
+  if (!dateStr) { alert("日付を入れてね"); return; }
+  if (pendingExercises.length === 0) { alert("運動を追加してね"); return; }
 
-  if (newRecord.exercises?.length > 0 && ctx.category !== "weight_increased") {
-    const totalMin = newRecord.exercises.reduce((s,e) => s + (e.unit === "rep" ? 0 : e.value), 0);
-    ctx.category = "exercise_done";
-    ctx.n = totalMin || newRecord.exercises.reduce((s,e) => s + e.value, 0);
-  }
+  const records = loadRecords();
+  const isFirstEver = Object.keys(records).length === 0;
+  if (!records[dateStr]) records[dateStr] = {};
+
+  const weight = getCurrentWeight();
+  records[dateStr].exercises = pendingExercises.map(e => ({
+    ...e,
+    kcal: e.kcal ?? calcKcal(e, weight),
+  }));
+  saveRecords(records);
 
   const streak = calcStreak(records, dateStr);
-  const milestones = [3,7,14,30,60,100,200,365];
-  if (milestones.includes(streak) && newRecord.exercises?.length > 0) {
-    ctx.category = "streak_milestone"; ctx.n = streak;
+  const milestones = [3, 7, 14, 30, 60, 100, 200, 365];
+
+  let category = isFirstEver ? "first_record" : "exercise_done";
+  let n;
+  if (!isFirstEver && milestones.includes(streak)) {
+    category = "streak_milestone";
+    n = streak;
+  } else {
+    const totalMin = pendingExercises.reduce((s, e) => s + (e.unit === "min" ? e.value : 0), 0);
+    n = totalMin || pendingExercises.reduce((s, e) => s + e.value, 0);
   }
-  return ctx;
+
+  showInlineComment("exercise", category, n);
+  renderStatsTab();
 }
 
-function getLatestContext() {
-  try { return JSON.parse(localStorage.getItem(LAST_LINE_KEY)) || { category: "default" }; }
-  catch { return { category: "default" }; }
+// ---------- 保存（食事） ----------
+function saveMeals() {
+  const dateStr = document.getElementById("date-input").value;
+  if (!dateStr) { alert("日付を入れてね"); return; }
+  if (pendingMeals.length === 0) { alert("食事を追加してね"); return; }
+
+  const records = loadRecords();
+  if (!records[dateStr]) records[dateStr] = {};
+  records[dateStr].meals = [...pendingMeals];
+  saveRecords(records);
+
+  const total = pendingMeals.reduce((s, m) => s + m.kcal, 0);
+  const target = getKcalTarget();
+  const category = total > target ? "food_over_calories" : "food_under_calories";
+  showInlineComment("food", category, total);
+  renderStatsTab();
 }
 
+// ---------- インラインコメント ----------
 function pickLine(partner, category, n) {
   const lines = partner.lines[category] || partner.lines.default || [""];
   return lines[Math.floor(Math.random() * lines.length)].replace(/\{n\}/g, n ?? "");
 }
 
-function showPartnerLines(context, animate = false) {
-  const ctx = context || { category: "default" };
-  const kEl = document.getElementById("speech-kaoru");
-  const cEl = document.getElementById("speech-kasumi");
-  if (animate) {
-    [kEl, cEl].forEach(el => { el.style.animation="none"; void el.offsetWidth; el.style.animation=""; });
-  }
-  kEl.textContent = pickLine(PARTNERS.kaoru,  ctx.category, ctx.n);
-  cEl.textContent = pickLine(PARTNERS.kasumi, ctx.category, ctx.n);
+function showInlineComment(zone, category, n) {
+  const wrapper = document.getElementById(`partner-comment-${zone}`);
+  const kEl = document.getElementById(`inline-kaoru-${zone}`);
+  const cEl = document.getElementById(`inline-kasumi-${zone}`);
+
+  kEl.textContent = pickLine(PARTNERS.kaoru, category, n);
+  cEl.textContent = pickLine(PARTNERS.kasumi, category, n);
+
+  wrapper.hidden = false;
+  [kEl, cEl].forEach(el => {
+    el.style.animation = "none";
+    void el.offsetWidth;
+    el.style.animation = "";
+  });
 }
 
+// ---------- 連続日数 ----------
 function calcStreak(records, fromDateStr = todayStr()) {
   let streak = 0;
   const cursor = new Date(fromDateStr);
   while (true) {
-    const key = cursor.toISOString().slice(0,10);
+    const key = cursor.toISOString().slice(0, 10);
     const r = records[key];
-    if (r?.exercises?.length > 0) { streak++; cursor.setDate(cursor.getDate()-1); }
+    if (r?.exercises?.length > 0) { streak++; cursor.setDate(cursor.getDate() - 1); }
     else break;
   }
   return streak;
@@ -278,30 +386,135 @@ function renderStreak() {
   const streak = calcStreak(loadRecords());
   document.getElementById("streak-number").textContent = streak;
   const sub = document.getElementById("streak-sub");
-  if      (streak === 0)  sub.textContent = "今日運動して、新しい連続記録をスタート！";
-  else if (streak < 7)    sub.textContent = "いい調子！この調子で続けよう";
-  else if (streak < 30)   sub.textContent = "もう習慣になってきてる！";
-  else                    sub.textContent = "すごい継続力…！本当にお疲れさま";
+  if (streak === 0) sub.textContent = "今日運動して、新しい連続記録をスタート！";
+  else if (streak < 7) sub.textContent = "いい調子！この調子で続けよう";
+  else if (streak < 30) sub.textContent = "もう習慣になってきてる！";
+  else sub.textContent = "すごい継続力…！本当にお疲れさま";
 }
 
+// ---------- 昨日との増減 ----------
+function renderWeightDiff() {
+  const records = loadRecords();
+  const withWeight = Object.entries(records)
+    .filter(([, r]) => r.weight != null)
+    .sort((a, b) => b[0].localeCompare(a[0]));
+
+  const el = document.getElementById("weight-diff-display");
+  if (withWeight.length < 2) {
+    el.innerHTML = '<p class="stat-empty">体重を2日分記録すると表示されます</p>';
+    return;
+  }
+
+  const [latestDate, latestRec] = withWeight[0];
+  const [prevDate, prevRec] = withWeight[1];
+  const diff = latestRec.weight - prevRec.weight;
+  const sign = diff > 0 ? "+" : "";
+  const cls = diff < -0.05 ? "good" : diff > 0.05 ? "caution" : "";
+  const label = diff < -0.05 ? "減った！" : diff > 0.05 ? "増えた" : "変わらず";
+
+  el.innerHTML = `<div class="weight-diff-value ${cls}">
+    ${sign}${diff.toFixed(1)}<span class="unit">kg</span>
+    <span style="font-size:14px;font-weight:normal;margin-left:6px">${label}</span>
+  </div>
+  <p class="weight-diff-sub">${formatDateJa(prevDate)} → ${formatDateJa(latestDate)}</p>`;
+}
+
+// ---------- カロリー収支 ----------
+function renderCalorieBalance() {
+  const records = loadRecords();
+  const dateStr = document.getElementById("date-input").value || todayStr();
+  const r = records[dateStr] || {};
+
+  const intake = r.meals ? r.meals.reduce((s, m) => s + m.kcal, 0) : 0;
+  const burned = r.exercises
+    ? r.exercises.reduce((s, e) => s + (normalizeExercise(e).kcal || 0), 0)
+    : 0;
+  const balance = intake - burned;
+
+  document.getElementById("stat-intake").textContent = intake;
+  document.getElementById("stat-burned").textContent = burned;
+
+  const balEl = document.getElementById("stat-balance-el");
+  const sign = balance > 0 ? "+" : "";
+  balEl.textContent = `${sign}${balance} kcal`;
+  balEl.className = balance > 500 ? "surplus" : balance < -200 ? "deficit" : "";
+}
+
+// ---------- コンディション ----------
+function renderCondition() {
+  const records = loadRecords();
+  const dateStr = document.getElementById("date-input").value || todayStr();
+  const r = records[dateStr] || {};
+
+  const hasWeight = r.weight != null;
+  const hasExercise = r.exercises?.length > 0;
+  const hasMeals = r.meals?.length > 0;
+
+  const el = document.getElementById("condition-display");
+
+  if (!hasWeight && !hasExercise && !hasMeals) {
+    el.innerHTML = `<div class="condition-status neutral">記録してみよう</div>
+      <div class="condition-note">体重・運動・食事を記録すると表示されます</div>`;
+    return;
+  }
+
+  const intake = hasMeals ? r.meals.reduce((s, m) => s + m.kcal, 0) : null;
+  const burned = hasExercise
+    ? r.exercises.reduce((s, e) => s + (normalizeExercise(e).kcal || 0), 0)
+    : 0;
+  const target = getKcalTarget();
+
+  let status = "neutral";
+  let message = "";
+  let note = "";
+
+  if (hasMeals && hasExercise) {
+    if (intake <= target) {
+      status = "good"; message = "いい調子！";
+      note = `食事${intake}kcal・運動${burned}kcal消費、ナイスバランス`;
+    } else {
+      status = "caution"; message = "食べすぎかも";
+      note = `${intake - target}kcalオーバー。運動は頑張った！`;
+    }
+  } else if (hasMeals) {
+    if (intake <= target) {
+      status = "good"; message = "食事OK！";
+      note = "カロリー目標内。運動も少し意識してみよ";
+    } else {
+      status = "caution"; message = "食べすぎかも";
+      note = `${intake - target}kcalオーバー。明日巻き返そう`;
+    }
+  } else if (hasExercise) {
+    status = "good"; message = "運動ナイス！";
+    note = `${burned}kcal消費。食事も記録すると収支がわかるよ`;
+  } else {
+    status = "neutral"; message = "体重記録済み";
+    note = "運動・食事も記録してみよう";
+  }
+
+  el.innerHTML = `<div class="condition-status ${status}">${message}</div>
+    <div class="condition-note">${note}</div>`;
+}
+
+// ---------- グラフ ----------
 let chartInstance = null;
 function renderChart(range = "7") {
   const records = loadRecords();
   const profile = loadProfile();
   const all = Object.entries(records)
-    .filter(([,r]) => r.weight != null)
-    .sort((a,b) => a[0].localeCompare(b[0]));
+    .filter(([, r]) => r.weight != null)
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
   let filtered = all;
   if (range !== "all") {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - parseInt(range) + 1);
-    const cutoffStr = cutoff.toISOString().slice(0,10);
+    const cutoffStr = cutoff.toISOString().slice(0, 10);
     filtered = all.filter(([d]) => d >= cutoffStr);
   }
 
   const labels = filtered.map(([d]) => d.slice(5));
-  const data   = filtered.map(([,r]) => r.weight);
+  const data = filtered.map(([, r]) => r.weight);
 
   const datasets = [{
     label: "体重 (kg)",
@@ -337,73 +550,113 @@ function renderChart(range = "7") {
       maintainAspectRatio: false,
       plugins: { legend: { display: !!profile.targetWeight } },
       scales: {
-        y: { ticks: { color:"#8a7c83" }, grid: { color:"#f0e1e7" } },
-        x: { ticks: { color:"#8a7c83" }, grid: { display: false } },
+        y: { ticks: { color: "#8a7c83" }, grid: { color: "#f0e1e7" } },
+        x: { ticks: { color: "#8a7c83" }, grid: { display: false } },
       },
     },
   });
 }
 
+// ---------- 履歴 ----------
 function renderHistory() {
   const records = loadRecords();
   const list = document.getElementById("history-list");
-  const entries = Object.entries(records).sort((a,b) => b[0].localeCompare(a[0]));
+  const entries = Object.entries(records).sort((a, b) => b[0].localeCompare(a[0]));
 
   if (!entries.length) {
     list.innerHTML = '<p style="color:#8a7c83;font-size:13px;text-align:center;padding:20px 0">まだ記録がありません</p>';
     return;
   }
 
-  list.innerHTML = entries.slice(0,50).map(([date,r]) => {
+  list.innerHTML = entries.slice(0, 50).map(([date, r]) => {
     const parts = [];
     if (r.weight != null) parts.push(`体重 ${r.weight}kg`);
-    let kcalTotal = 0;
+
+    let burnedKcal = 0;
     if (r.exercises?.length > 0) {
       const exList = r.exercises.map(e => {
         const norm = normalizeExercise(e);
-        if (norm.kcal) kcalTotal += norm.kcal;
-        return `${norm.name}(${norm.value}${norm.unit==="rep"?"回":"分"})`;
+        const ul = norm.unit === "rep" ? "回" : "分";
+        if (norm.kcal) burnedKcal += norm.kcal;
+        return `${norm.name}(${norm.value}${ul})`;
       });
       parts.push(`運動 ${exList.join("、")}`);
     }
-    const kcalHtml = kcalTotal > 0
-      ? `<div class="history-kcal">消費カロリー 約${kcalTotal}kcal</div>` : "";
+
+    let intakeKcal = 0;
+    if (r.meals?.length > 0) {
+      r.meals.forEach(m => { intakeKcal += m.kcal; });
+      parts.push(`食事 ${intakeKcal}kcal`);
+    }
+
+    const sub = [];
+    if (burnedKcal > 0) sub.push(`消費 約${burnedKcal}kcal`);
+    if (intakeKcal > 0) sub.push(`摂取 ${intakeKcal}kcal`);
+    const subHtml = sub.length ? `<div class="history-kcal">${sub.join(" / ")}</div>` : "";
+
     return `<div class="history-item">
       <div class="history-date">${formatDateJa(date)}</div>
       <div class="history-detail">${parts.join(" / ") || "—"}</div>
-      ${kcalHtml}
+      ${subHtml}
     </div>`;
   }).join("");
 }
 
+// ---------- 統計タブ まとめ ----------
+function renderStatsTab() {
+  renderChart(document.querySelector(".range-btn.active")?.dataset.range || "7");
+  renderStreak();
+  renderWeightDiff();
+  renderCalorieBalance();
+  renderCondition();
+  renderHistory();
+}
+
+// ---------- マイ情報フォーム ----------
 function loadProfileForm() {
   const p = loadProfile();
-  if (p.height)       document.getElementById("profile-height").value = p.height;
+  if (p.height) document.getElementById("profile-height").value = p.height;
   if (p.targetWeight) document.getElementById("profile-target").value = p.targetWeight;
+  if (p.kcalTarget) document.getElementById("profile-kcal").value = p.kcalTarget;
 }
 
 function saveProfileForm() {
-  const height       = parseFloat(document.getElementById("profile-height").value);
+  const height = parseFloat(document.getElementById("profile-height").value);
   const targetWeight = parseFloat(document.getElementById("profile-target").value);
+  const kcalTarget = parseInt(document.getElementById("profile-kcal").value);
   const p = loadProfile();
-  if (!isNaN(height) && height > 0)             p.height = height;
+  if (!isNaN(height) && height > 0) p.height = height;
   if (!isNaN(targetWeight) && targetWeight > 0) p.targetWeight = targetWeight;
+  if (!isNaN(kcalTarget) && kcalTarget > 0) p.kcalTarget = kcalTarget;
   saveProfile(p);
+  updateCalorieBar();
+
   const msg = document.getElementById("profile-saved-msg");
   msg.textContent = "保存しました！";
   setTimeout(() => { msg.textContent = ""; }, 2000);
+
   renderChart(document.querySelector(".range-btn.active")?.dataset.range || "7");
   renderProfileSummary();
 }
 
+function autoCalcKcalTarget() {
+  const weight = getCurrentWeight() || 60;
+  const p = loadProfile();
+  const height = p.height || parseFloat(document.getElementById("profile-height").value) || 168;
+  const bmr = 10 * weight + 6.25 * height - 5 * 30 - 161;
+  document.getElementById("profile-kcal").value = Math.round(bmr * 1.375 - 350);
+}
+
 function renderProfileSummary() {
   const p = loadProfile();
-  const latestEntry = Object.entries(loadRecords())
-    .filter(([,r]) => r.weight != null)
-    .sort((a,b) => b[0].localeCompare(a[0]))[0];
+  const records = loadRecords();
+  const latestEntry = Object.entries(records)
+    .filter(([, r]) => r.weight != null)
+    .sort((a, b) => b[0].localeCompare(a[0]))[0];
   const latestWeight = latestEntry?.[1].weight ?? null;
+
   const bmi = (p.height && latestWeight)
-    ? (latestWeight / Math.pow(p.height/100, 2)).toFixed(1) : null;
+    ? (latestWeight / Math.pow(p.height / 100, 2)).toFixed(1) : null;
   const diff = (p.targetWeight && latestWeight)
     ? (latestWeight - p.targetWeight) : null;
 
@@ -414,13 +667,16 @@ function renderProfileSummary() {
   }
 
   let boxes = "";
-  if (latestWeight)   boxes += summaryBox("最新の体重", latestWeight, "kg", "");
+  if (latestWeight) boxes += summaryBox("最新の体重", latestWeight, "kg", "");
   if (p.targetWeight) boxes += summaryBox("目標体重", p.targetWeight, "kg", "");
   if (diff !== null) {
-    boxes += summaryBox("目標まで", (diff > 0 ? "+" : "") + diff.toFixed(1), "kg", diff <= 0 ? "good" : "caution");
+    const sign = diff > 0 ? "+" : "";
+    boxes += summaryBox("目標まで", sign + diff.toFixed(1), "kg", diff <= 0 ? "good" : "caution");
   }
   if (p.height) boxes += summaryBox("身長", p.height, "cm", "");
-  if (bmi)      boxes += summaryBox("BMI", bmi, "", bmi < 18.5 || bmi >= 25 ? "caution" : "good");
+  if (bmi) boxes += summaryBox("BMI", bmi, "", bmi < 18.5 ? "caution" : bmi < 25 ? "good" : "caution");
+  if (p.kcalTarget) boxes += summaryBox("カロリー目標", p.kcalTarget, "kcal/日", "");
+
   el.innerHTML = `<div class="summary-grid">${boxes}</div>`;
 }
 
@@ -431,9 +687,10 @@ function summaryBox(label, value, unit, cls) {
   </div>`;
 }
 
+// ---------- エクスポート／インポート ----------
 function exportData() {
   const blob = new Blob([localStorage.getItem(STORAGE_KEY) || "{}"], { type: "application/json" });
-  const url  = URL.createObjectURL(blob);
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url; a.download = `saya-diet-${todayStr()}.json`; a.click();
   URL.revokeObjectURL(url);
@@ -447,18 +704,12 @@ function importData(e) {
       const data = JSON.parse(ev.target.result);
       if (typeof data !== "object") throw new Error();
       if (!confirm("現在のデータを上書きします。続けますか？")) return;
-      saveRecords(data); renderAll();
+      saveRecords(data);
       loadDateData(document.getElementById("date-input").value);
+      renderStatsTab();
       alert("読み込みました！");
     } catch { alert("ファイルを読み込めませんでした"); }
   };
   reader.readAsText(file);
   e.target.value = "";
-}
-
-function renderAll() {
-  renderChart(document.querySelector(".range-btn.active")?.dataset.range || "7");
-  renderStreak();
-  renderHistory();
-  showPartnerLines(getLatestContext(), false);
 }
