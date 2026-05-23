@@ -10,77 +10,174 @@
 <body>
   <header class="app-header">
     <h1>さやのダイエット記録</h1>
-    <p class="today" id="today-label"></p>
   </header>
 
-  <!-- タブ -->
   <nav class="tab-nav">
     <button class="tab-btn active" data-tab="record">記録</button>
+    <button class="tab-btn" data-tab="stats">増減など</button>
     <button class="tab-btn" data-tab="profile">マイ情報</button>
   </nav>
 
   <main>
 
-    <!-- ===== 記録タブ ===== -->
+    <!-- ===== ① 記録タブ ===== -->
     <div id="tab-record" class="tab-content active">
 
-      <!-- パートナーからの一言 -->
-      <section class="card partners-card">
-        <h2>パートナーから一言</h2>
-        <div class="partners">
-          <div class="partner" id="partner-kaoru">
-            <img class="partner-icon" src="images/kaoru.png" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
-            <div class="partner-body">
-              <div class="partner-name">薫</div>
-              <div class="speech-bubble" id="speech-kaoru">…</div>
-            </div>
-          </div>
-          <div class="partner" id="partner-kasumi">
-            <img class="partner-icon" src="images/kasumi.png" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
-            <div class="partner-body">
-              <div class="partner-name">霞</div>
-              <div class="speech-bubble kasumi" id="speech-kasumi">…</div>
-            </div>
+      <!-- 日付バー -->
+      <div class="date-bar card">
+        <label for="date-input">日付</label>
+        <input type="date" id="date-input" />
+      </div>
+
+      <!-- 体重 -->
+      <section class="card record-section">
+        <h2>体重</h2>
+        <div class="row-inline">
+          <input type="number" id="weight-input" step="0.1" min="0" placeholder="kg を入力" />
+          <button id="save-weight-btn" class="record-btn">記録する</button>
+        </div>
+      </section>
+      <div class="partner-inline" id="partner-comment-weight" hidden>
+        <div class="mini-partner">
+          <img class="mini-icon" src="images/kaoru.png" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">薫</div>
+            <div class="speech-bubble" id="inline-kaoru-weight">…</div>
           </div>
         </div>
-        <button id="refresh-lines" class="ghost-btn">別の一言を見る</button>
+        <div class="mini-partner">
+          <img class="mini-icon" src="images/kasumi.png" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">霞</div>
+            <div class="speech-bubble kasumi" id="inline-kasumi-weight">…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 運動 -->
+      <section class="card record-section">
+        <h2>運動</h2>
+        <div class="exercise-row">
+          <select id="exercise-select"></select>
+          <input type="number" id="exercise-value" min="0" placeholder="分" />
+          <button id="unit-toggle" class="unit-btn">分</button>
+          <button id="add-exercise" class="ghost-btn">追加</button>
+        </div>
+        <ul id="exercise-list" class="item-list"></ul>
+        <button id="save-exercise-btn" class="record-btn" style="width:100%;margin-top:4px">記録する</button>
+      </section>
+      <div class="partner-inline" id="partner-comment-exercise" hidden>
+        <div class="mini-partner">
+          <img class="mini-icon" src="images/kaoru.png" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">薫</div>
+            <div class="speech-bubble" id="inline-kaoru-exercise">…</div>
+          </div>
+        </div>
+        <div class="mini-partner">
+          <img class="mini-icon" src="images/kasumi.png" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">霞</div>
+            <div class="speech-bubble kasumi" id="inline-kasumi-exercise">…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 食事 -->
+      <section class="card record-section">
+        <h2>食事</h2>
+        <!-- カロリーバー -->
+        <div class="calorie-bar-wrap">
+          <div class="calorie-bar-label">
+            <span>本日 <strong id="today-intake-kcal">0</strong> kcal</span>
+            <span>目標 <strong id="target-kcal-label">1500</strong> kcal</span>
+          </div>
+          <div class="calorie-bar">
+            <div class="calorie-fill" id="calorie-fill"></div>
+          </div>
+        </div>
+        <!-- 入力行 -->
+        <div class="meal-row">
+          <select id="meal-timing">
+            <option>朝食</option>
+            <option>昼食</option>
+            <option>夕食</option>
+            <option>間食</option>
+          </select>
+          <input list="food-datalist" id="food-name-input" placeholder="食べたもの（候補あり）" />
+          <datalist id="food-datalist"></datalist>
+          <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
+          <button id="add-food-btn" class="ghost-btn">追加</button>
+        </div>
+        <ul id="food-list" class="item-list"></ul>
+        <button id="save-food-btn" class="record-btn" style="width:100%;margin-top:4px">記録する</button>
+      </section>
+      <div class="partner-inline" id="partner-comment-food" hidden>
+        <div class="mini-partner">
+          <img class="mini-icon" src="images/kaoru.png" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">薫</div>
+            <div class="speech-bubble" id="inline-kaoru-food">…</div>
+          </div>
+        </div>
+        <div class="mini-partner">
+          <img class="mini-icon" src="images/kasumi.png" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">霞</div>
+            <div class="speech-bubble kasumi" id="inline-kasumi-food">…</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-record -->
+
+    <!-- ===== ② 増減などタブ ===== -->
+    <div id="tab-stats" class="tab-content">
+
+      <!-- コンディション -->
+      <section class="card condition-card">
+        <h2>今日のコンディション</h2>
+        <div id="condition-display">
+          <div class="condition-status neutral">記録してみよう</div>
+          <div class="condition-note">体重・運動・食事を記録すると表示されます</div>
+        </div>
       </section>
 
-      <!-- 今日の記録入力 -->
+      <!-- 昨日比 + 連続日数 -->
+      <div class="stats-row">
+        <section class="card stat-mini">
+          <h2>昨日との増減</h2>
+          <div id="weight-diff-display">
+            <p class="stat-empty">体重を記録すると表示されます</p>
+          </div>
+        </section>
+        <section class="card stat-mini streak-card">
+          <h2>運動継続</h2>
+          <div class="streak-display">
+            <span class="streak-number" id="streak-number">0</span>
+            <span class="streak-label">日</span>
+          </div>
+          <p class="streak-sub" id="streak-sub"></p>
+        </section>
+      </div>
+
+      <!-- カロリー収支 -->
       <section class="card">
-        <h2>今日の記録</h2>
-        <div class="form-row">
-          <label for="date-input">日付</label>
-          <input type="date" id="date-input" />
-        </div>
-        <div class="form-row">
-          <label for="weight-input">体重 (kg)</label>
-          <input type="number" id="weight-input" step="0.1" min="0" placeholder="例: 52.3" />
-        </div>
-
-        <div class="form-row">
-          <label>運動</label>
-          <div class="exercise-row">
-            <select id="exercise-select"></select>
-            <input type="number" id="exercise-value" min="0" placeholder="分" />
-            <button id="unit-toggle" class="unit-btn">分</button>
-            <button id="add-exercise" class="ghost-btn">追加</button>
+        <h2>今日のカロリー収支</h2>
+        <div class="calorie-balance">
+          <div class="cal-row">
+            <span>摂取カロリー</span>
+            <strong><span id="stat-intake">0</span> kcal</strong>
+          </div>
+          <div class="cal-row">
+            <span>消費カロリー（運動）</span>
+            <strong><span id="stat-burned">0</span> kcal</strong>
+          </div>
+          <div class="cal-row cal-balance-row">
+            <span>収支</span>
+            <strong id="stat-balance-el">0 kcal</strong>
           </div>
         </div>
-
-        <ul id="exercise-list" class="exercise-list"></ul>
-
-        <button id="save-btn" class="primary-btn">保存する</button>
-      </section>
-
-      <!-- 連続日数 -->
-      <section class="card streak-card">
-        <h2>運動の継続</h2>
-        <div class="streak-display">
-          <span class="streak-number" id="streak-number">0</span>
-          <span class="streak-label">日連続！</span>
-        </div>
-        <p class="streak-sub" id="streak-sub"></p>
       </section>
 
       <!-- 体重グラフ -->
@@ -101,25 +198,30 @@
       <section class="card">
         <h2>記録一覧</h2>
         <div id="history-list" class="history-list"></div>
-        <button id="export-btn" class="ghost-btn">データを書き出す (JSON)</button>
-        <button id="import-btn" class="ghost-btn">データを読み込む</button>
-        <input type="file" id="import-file" accept="application/json" style="display:none" />
       </section>
 
-    </div><!-- /tab-record -->
+    </div><!-- /tab-stats -->
 
-    <!-- ===== マイ情報タブ ===== -->
+    <!-- ===== ③ マイ情報タブ ===== -->
     <div id="tab-profile" class="tab-content">
 
       <section class="card">
         <h2>基本情報</h2>
         <div class="form-row">
           <label for="profile-height">身長 (cm)</label>
-          <input type="number" id="profile-height" step="0.1" placeholder="例: 160.0" />
+          <input type="number" id="profile-height" step="0.1" placeholder="例: 168.0" />
         </div>
         <div class="form-row">
           <label for="profile-target">目標体重 (kg)</label>
           <input type="number" id="profile-target" step="0.1" placeholder="例: 50.0" />
+        </div>
+        <div class="form-row">
+          <label for="profile-kcal">1日の摂取カロリー目標 (kcal)</label>
+          <div class="row-inline">
+            <input type="number" id="profile-kcal" placeholder="例: 1500" />
+            <button id="auto-calc-kcal-btn" class="ghost-btn">自動計算</button>
+          </div>
+          <p class="input-note">自動計算：記録済みの体重・身長をもとにゆっくり痩せる目安を算出</p>
         </div>
         <button id="save-profile-btn" class="primary-btn">保存する</button>
         <p id="profile-saved-msg" class="profile-msg"></p>
@@ -128,6 +230,13 @@
       <section class="card">
         <h2>いまの状況</h2>
         <div id="profile-summary"></div>
+      </section>
+
+      <section class="card">
+        <h2>データ管理</h2>
+        <button id="export-btn" class="ghost-btn">データを書き出す (JSON)</button>
+        <button id="import-btn" class="ghost-btn">データを読み込む</button>
+        <input type="file" id="import-file" accept="application/json" style="display:none" />
       </section>
 
     </div><!-- /tab-profile -->
@@ -139,6 +248,7 @@
   </footer>
 
   <script src="exercises.js"></script>
+  <script src="foods.js"></script>
   <script src="partners.js"></script>
   <script src="app.js"></script>
 </body>
