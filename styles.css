@@ -19,6 +19,9 @@
 
 * { box-sizing: border-box; }
 
+/* iOSのフォーカス時自動ズームを防止（16px未満でズームが起きる） */
+input, select, textarea { font-size: 16px; }
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
