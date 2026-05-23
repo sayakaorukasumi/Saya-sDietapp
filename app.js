@@ -1,6 +1,18 @@
 const STORAGE_KEY = "saya-diet-records";
 const PROFILE_KEY = "saya-diet-profile";
 
+// iOSのフォーカス時自動ズームをJSで防止
+(function() {
+  const viewport = document.querySelector('meta[name=viewport]');
+  if (!viewport) return;
+  document.addEventListener('focusin', () => {
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
+  });
+  document.addEventListener('focusout', () => {
+    viewport.content = 'width=device-width, initial-scale=1.0';
+  });
+})();
+
 // ---------- ストレージ ----------
 function loadRecords() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
