@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>さやのダイエット記録</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="app-header">
+    <h1>さやのダイエット記録</h1>
+    <p class="today" id="today-label"></p>
+  </header>
+
+  <main>
+    <!-- パートナーからの一言 -->
+    <section class="card partners-card">
+      <h2>パートナーから一言</h2>
+      <div class="partners">
+        <div class="partner" id="partner-kaoru">
+          <img class="partner-icon" src="images/kaoru.png" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">薫</div>
+            <div class="speech-bubble" id="speech-kaoru">…</div>
+          </div>
+        </div>
+        <div class="partner" id="partner-kasumi">
+          <img class="partner-icon" src="images/kasumi.png" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
+          <div class="partner-body">
+            <div class="partner-name">霞</div>
+            <div class="speech-bubble kasumi" id="speech-kasumi">…</div>
+          </div>
+        </div>
+      </div>
+      <button id="refresh-lines" class="ghost-btn">別の一言を見る</button>
+    </section>
+
+    <!-- 今日の記録入力 -->
+    <section class="card">
+      <h2>今日の記録</h2>
+      <div class="form-row">
+        <label for="date-input">日付</label>
+        <input type="date" id="date-input" />
+      </div>
+      <div class="form-row">
+        <label for="weight-input">体重 (kg)</label>
+        <input type="number" id="weight-input" step="0.1" min="0" placeholder="例: 52.3" />
+      </div>
+
+      <div class="form-row">
+        <label>運動</label>
+        <div class="exercise-row">
+          <select id="exercise-select"></select>
+          <input type="number" id="exercise-minutes" min="0" placeholder="分" />
+          <button id="add-exercise" class="ghost-btn">追加</button>
+        </div>
+      </div>
+
+      <ul id="exercise-list" class="exercise-list"></ul>
+
+      <button id="save-btn" class="primary-btn">保存する</button>
+    </section>
+
+    <!-- 連続日数 -->
+    <section class="card streak-card">
+      <h2>運動の継続</h2>
+      <div class="streak-display">
+        <span class="streak-number" id="streak-number">0</span>
+        <span class="streak-label">日連続！</span>
+      </div>
+      <p class="streak-sub" id="streak-sub"></p>
+    </section>
+
+    <!-- 体重グラフ -->
+    <section class="card">
+      <h2>体重の推移</h2>
+      <div class="chart-wrapper">
+        <canvas id="weight-chart"></canvas>
+      </div>
+      <div class="range-buttons">
+        <button data-range="7" class="range-btn active">1週間</button>
+        <button data-range="30" class="range-btn">1ヶ月</button>
+        <button data-range="90" class="range-btn">3ヶ月</button>
+        <button data-range="all" class="range-btn">全期間</button>
+      </div>
+    </section>
+
+    <!-- 記録一覧 -->
+    <section class="card">
+      <h2>記録一覧</h2>
+      <div id="history-list" class="history-list"></div>
+      <button id="export-btn" class="ghost-btn">データを書き出す (JSON)</button>
+      <button id="import-btn" class="ghost-btn">データを読み込む</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none" />
+    </section>
+  </main>
+
+  <footer>
+    <p>データはこの端末のブラウザに保存されます。</p>
+  </footer>
+
+  <script src="exercises.js"></script>
+  <script src="partners.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
