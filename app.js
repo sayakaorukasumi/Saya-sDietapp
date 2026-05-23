@@ -1,6 +1,18 @@
 const STORAGE_KEY = "saya-diet-records";
 const PROFILE_KEY = "saya-diet-profile";
 
+// iOSのフォーカス時自動ズームをJSで防止
+(function() {
+  const viewport = document.querySelector('meta[name=viewport]');
+  if (!viewport) return;
+  document.addEventListener('focusin', () => {
+    viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
+  });
+  document.addEventListener('focusout', () => {
+    viewport.content = 'width=device-width, initial-scale=1.0';
+  });
+})();
+
 // ---------- ストレージ ----------
 function loadRecords() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
@@ -24,7 +36,7 @@ function formatDateJa(s) {
   return `${y}年${parseInt(m)}月${parseInt(d)}日`;
 }
 
-// ---------- 運動データの後方互換 ----------
+// ---------- 運動データの後方互换 ----------
 function normalizeExercise(ex) {
   if (ex.value != null) return ex;
   return { name: ex.name, value: ex.minutes, unit: "min", kcal: ex.kcal ?? null };
@@ -200,7 +212,7 @@ function renderExerciseList() {
   ul.innerHTML = pendingExercises.map((e, i) => {
     const unitLabel = e.unit === "rep" ? "回" : "分";
     const kcal = e.kcal ?? calcKcal(e, weight);
-    const kcalHtml = kcal != null ? `<span class="kcal-badge">約${kcal}kcal</span>` : "";
+    const kcalHtml = kcal != null ? `<span class="kcal-badge">絰4${kcal}kcal</span>` : "";
     return `<li>
       <span>${e.name} ${e.value}${unitLabel} ${kcalHtml}</span>
       <button class="remove" data-i="${i}" aria-label="削除">×</button>
@@ -482,7 +494,7 @@ function renderCondition() {
       note = "カロリー目標内。運動も少し意識してみよ";
     } else {
       status = "caution"; message = "食べすぎかも";
-      note = `${intake - target}kcalオーバー。明日巻き返そう`;
+      note = `${intake - target}kcalオーバー。明日巧き返そう`;
     }
   } else if (hasExercise) {
     status = "good"; message = "運動ナイス！";
@@ -590,7 +602,7 @@ function renderHistory() {
     }
 
     const sub = [];
-    if (burnedKcal > 0) sub.push(`消費 約${burnedKcal}kcal`);
+    if (burnedKcal > 0) sub.push(`消費 約4${burnedKcal}kcal`);
     if (intakeKcal > 0) sub.push(`摂取 ${intakeKcal}kcal`);
     const subHtml = sub.length ? `<div class="history-kcal">${sub.join(" / ")}</div>` : "";
 
