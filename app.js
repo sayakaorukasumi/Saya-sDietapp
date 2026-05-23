@@ -212,7 +212,7 @@ function renderExerciseList() {
   ul.innerHTML = pendingExercises.map((e, i) => {
     const unitLabel = e.unit === "rep" ? "回" : "分";
     const kcal = e.kcal ?? calcKcal(e, weight);
-    const kcalHtml = kcal != null ? `<span class="kcal-badge">絰4${kcal}kcal</span>` : "";
+    const kcalHtml = kcal != null ? `<span class="kcal-badge">約${kcal}kcal</span>` : "";
     return `<li>
       <span>${e.name} ${e.value}${unitLabel} ${kcalHtml}</span>
       <button class="remove" data-i="${i}" aria-label="削除">×</button>
@@ -602,7 +602,7 @@ function renderHistory() {
     }
 
     const sub = [];
-    if (burnedKcal > 0) sub.push(`消費 約4${burnedKcal}kcal`);
+    if (burnedKcal > 0) sub.push(`消費 約${burnedKcal}kcal`);
     if (intakeKcal > 0) sub.push(`摂取 ${intakeKcal}kcal`);
     const subHtml = sub.length ? `<div class="history-kcal">${sub.join(" / ")}</div>` : "";
 
