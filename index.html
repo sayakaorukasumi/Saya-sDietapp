@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>さやのダイエット記録</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="images/app-icon.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="さやのダイエット" />
+  <meta name="theme-color" content="#f5a3b6" />
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -104,7 +110,7 @@
             <option>夕食</option>
             <option>間食</option>
           </select>
-          <input list="food-datalist" id="food-name-input" placeholder="食べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
+          <input list="food-datalist" id="food-name-input" placeholder="町べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
           <datalist id="food-datalist"></datalist>
           <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
           <button id="add-food-btn" class="ghost-btn">追加</button>
@@ -166,7 +172,7 @@
         <h2>今日のカロリー収支</h2>
         <div class="calorie-balance">
           <div class="cal-row">
-            <span>摂取カロリー</span>
+            <span>摄取カロリー</span>
             <strong><span id="stat-intake">0</span> kcal</strong>
           </div>
           <div class="cal-row">
@@ -216,7 +222,7 @@
           <input type="number" id="profile-target" step="0.1" placeholder="例: 50.0" />
         </div>
         <div class="form-row">
-          <label for="profile-kcal">1日の摂取カロリー目標 (kcal)</label>
+          <label for="profile-kcal">1日の摄取カロリー目標 (kcal)</label>
           <div class="row-inline">
             <input type="number" id="profile-kcal" placeholder="例: 1500" />
             <button id="auto-calc-kcal-btn" class="ghost-btn">自動計算</button>
