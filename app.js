@@ -714,6 +714,7 @@ function renderStatsTab() {
   renderStreak();
   renderWeightDiff();
   renderCalorieBalance();
+  renderNutritionBalance();
   renderCondition();
   renderHistory();
 }
