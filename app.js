@@ -140,8 +140,15 @@ function initFoodDatalist() {
   dl.innerHTML = FOOD_DATABASE.map(f => `<option value="${f.name}">`).join("");
 
   document.getElementById("food-name-input").addEventListener("input", e => {
-    const match = FOOD_DATABASE.find(f => f.name === e.target.value);
-    if (match) document.getElementById("food-kcal-input").value = match.kcal;
+    const val = e.target.value;
+    const match = FOOD_DATABASE.find(f => f.name === val);
+    const customRow = document.getElementById("custom-nutrition-row");
+    if (match) {
+      document.getElementById("food-kcal-input").value = match.kcal;
+      customRow.hidden = true;
+    } else {
+      customRow.hidden = !val.trim();
+    }
   });
 }
 
@@ -234,15 +241,21 @@ function addFood() {
   if (!name) { alert("食べたものを入力してね"); return; }
   if (!kcal || kcal <= 0) { alert("カロリーを入力してね"); return; }
   const dbMatch = FOOD_DATABASE.find(f => f.name === name);
+  const customRow = document.getElementById("custom-nutrition-row");
+  const readCustom = (id) => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? null : v; };
   pendingMeals.push({
     timing, name, kcal,
-    protein: dbMatch?.protein ?? null,
-    fat: dbMatch?.fat ?? null,
-    carbs: dbMatch?.carbs ?? null,
-    fiber: dbMatch?.fiber ?? null,
+    protein: dbMatch?.protein ?? (customRow.hidden ? null : readCustom("custom-protein")),
+    fat:     dbMatch?.fat     ?? (customRow.hidden ? null : readCustom("custom-fat")),
+    carbs:   dbMatch?.carbs   ?? (customRow.hidden ? null : readCustom("custom-carbs")),
+    fiber:   dbMatch?.fiber   ?? (customRow.hidden ? null : readCustom("custom-fiber")),
   });
   document.getElementById("food-name-input").value = "";
   document.getElementById("food-kcal-input").value = "";
+  ["custom-protein","custom-fat","custom-carbs","custom-fiber"].forEach(id => {
+    document.getElementById(id).value = "";
+  });
+  customRow.hidden = true;
   renderFoodList();
   updateCalorieBar();
 }

@@ -115,6 +115,15 @@
           <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
           <button id="add-food-btn" class="ghost-btn">追加</button>
         </div>
+        <div id="custom-nutrition-row" class="custom-nutrition-row" hidden>
+          <div class="custom-nutrition-label">栄養素（任意・手入力のとき）</div>
+          <div class="custom-nutrition-inputs">
+            <input type="number" id="custom-protein" placeholder="たんぱく質g" step="0.1" min="0" />
+            <input type="number" id="custom-fat" placeholder="脂質g" step="0.1" min="0" />
+            <input type="number" id="custom-carbs" placeholder="炭水化物g" step="0.1" min="0" />
+            <input type="number" id="custom-fiber" placeholder="食物繊維g" step="0.1" min="0" />
+          </div>
+        </div>
         <ul id="food-list" class="item-list"></ul>
         <button id="save-food-btn" class="record-btn" style="width:100%;margin-top:4px">記録する</button>
       </section>
