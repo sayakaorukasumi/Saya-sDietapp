@@ -110,7 +110,7 @@
             <option>夕食</option>
             <option>間食</option>
           </select>
-          <input list="food-datalist" id="food-name-input" placeholder="町べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
+          <input list="food-datalist" id="food-name-input" placeholder="食べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
           <datalist id="food-datalist"></datalist>
           <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
           <button id="add-food-btn" class="ghost-btn">追加</button>
@@ -172,7 +172,7 @@
         <h2>今日のカロリー収支</h2>
         <div class="calorie-balance">
           <div class="cal-row">
-            <span>摄取カロリー</span>
+            <span>摂取カロリー</span>
             <strong><span id="stat-intake">0</span> kcal</strong>
           </div>
           <div class="cal-row">
@@ -184,6 +184,13 @@
             <strong id="stat-balance-el">0 kcal</strong>
           </div>
         </div>
+      </section>
+
+      <!-- 栄養バランス -->
+      <section class="card">
+        <h2>今日の栄養バランス</h2>
+        <div id="nutrition-display"></div>
+        <div id="nutrition-partner-advice" class="partner-advice-mini"></div>
       </section>
 
       <!-- 体重グラフ -->
@@ -222,7 +229,7 @@
           <input type="number" id="profile-target" step="0.1" placeholder="例: 50.0" />
         </div>
         <div class="form-row">
-          <label for="profile-kcal">1日の摄取カロリー目標 (kcal)</label>
+          <label for="profile-kcal">1日の摂取カロリー目標 (kcal)</label>
           <div class="row-inline">
             <input type="number" id="profile-kcal" placeholder="例: 1500" />
             <button id="auto-calc-kcal-btn" class="ghost-btn">自動計算</button>
