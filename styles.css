@@ -266,6 +266,33 @@ main {
 .meal-row #food-kcal-input { width: 80px; flex-shrink: 0; padding: 10px 8px; font-size: 16px; }
 .meal-row #add-food-btn { width: 100%; margin: 0; }
 
+/* 手入力時の栄養素入力行 */
+.custom-nutrition-row {
+  margin-bottom: 8px;
+  animation: fadeIn 0.2s ease-out;
+}
+.custom-nutrition-label {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+}
+.custom-nutrition-inputs {
+  display: flex;
+  gap: 6px;
+}
+.custom-nutrition-inputs input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  text-align: center;
+  background: #fff;
+  color: var(--text);
+  font-family: inherit;
+}
+
 /* カロリーバー */
 .calorie-bar-wrap { margin-bottom: 12px; }
 .calorie-bar-label {
