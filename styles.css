@@ -599,6 +599,37 @@ footer {
 .sugars-label  { color: #d07030; }
 .fiber-label   { color: #5ca85c; }
 
+.slim-verdict {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.verdict-great { background: #e6f5e6; color: #2d6e2d; border: 1px solid #a8d8a8; }
+.verdict-good  { background: #fff8e6; color: #7a5500; border: 1px solid #f5d9a0; }
+.verdict-warn  { background: #fff3e6; color: #8a4a00; border: 1px solid #f0c080; }
+.verdict-bad   { background: #fef0f0; color: #8a2a2a; border: 1px solid #e8b0b0; }
+
+.diet-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+.diet-badge--good { background: var(--good); color: #fff; }
+.diet-badge--warn { background: var(--warn); color: #fff; }
+.diet-badge--bad  { background: var(--bad);  color: #fff; }
+
 .partner-advice-mini {
   margin-top: 14px;
   padding-top: 12px;

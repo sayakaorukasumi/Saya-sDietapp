@@ -510,18 +510,40 @@ function renderNutritionBalance() {
   const sTarget = Math.max(1, cTarget - fibTarget);
   const pct = (val, tgt) => Math.min(Math.round(val / tgt * 100), 100);
 
+  const totalKcal = meals.reduce((sum, m) => sum + (m.kcal || 0), 0);
+  const chk = (val, tgt, mode) => mode === "min"
+    ? (val >= tgt * 0.8 ? "good" : val >= tgt * 0.5 ? "warn" : "bad")
+    : (val <= tgt ? "good" : val <= tgt * 1.2 ? "warn" : "bad");
+  const cp   = chk(p,      pTarget, "min");
+  const cf   = chk(f,      fTarget, "max");
+  const cs   = chk(sugars, sTarget, "max");
+  const cfib = fib >= 15 ? "good" : fib >= 8 ? "warn" : "bad";
+  const ckcal = totalKcal <= kcalTarget ? "good" : totalKcal <= kcalTarget * 1.1 ? "warn" : "bad";
+  const goods = [cp, cf, cs, cfib, ckcal].filter(c => c === "good").length;
+
+  const badge = (chk) => {
+    const sym = chk === "good" ? "◎" : chk === "warn" ? "△" : "×";
+    return `<span class="diet-badge diet-badge--${chk}">${sym}</span>`;
+  };
+  let verdictText, verdictCls;
+  if (goods >= 4)      { verdictText = "今日は痩せやすいバランス！";      verdictCls = "verdict-great"; }
+  else if (goods === 3){ verdictText = "惜しい！あと少しで理想バランス"; verdictCls = "verdict-good";  }
+  else if (goods === 2){ verdictText = "もう少し意識してみよう";           verdictCls = "verdict-warn";  }
+  else                 { verdictText = "今日の食事を見直してみよう";       verdictCls = "verdict-bad";   }
+
   el.innerHTML = `
+    <div class="slim-verdict ${verdictCls}">${verdictText}</div>
     <div class="nutrition-row">
       <div class="nutrition-label">
-        <span class="nutrition-name protein-label">たんぱく質</span>
-        <span class="nutrition-val">${p.toFixed(1)}g <span class="nutrition-target">/ 目安${pTarget}g</span></span>
+        <span class="nutrition-name protein-label">${badge(cp)}たんぱく質</span>
+        <span class="nutrition-val">${p.toFixed(1)}g <span class="nutrition-target">/ 目安${pTarget}g以上</span></span>
       </div>
       <div class="nutrition-bar-bg"><div class="nutrition-bar protein-bar" style="width:${pct(p,pTarget)}%"></div></div>
     </div>
     <div class="nutrition-row">
       <div class="nutrition-label">
-        <span class="nutrition-name fat-label">脂質</span>
-        <span class="nutrition-val">${f.toFixed(1)}g <span class="nutrition-target">/ 目安${fTarget}g</span></span>
+        <span class="nutrition-name fat-label">${badge(cf)}脂質</span>
+        <span class="nutrition-val">${f.toFixed(1)}g <span class="nutrition-target">/ 目安${fTarget}g以内</span></span>
       </div>
       <div class="nutrition-bar-bg"><div class="nutrition-bar fat-bar" style="width:${pct(f,fTarget)}%"></div></div>
     </div>
@@ -534,15 +556,15 @@ function renderNutritionBalance() {
     </div>
     <div class="nutrition-row">
       <div class="nutrition-label">
-        <span class="nutrition-name sugars-label">糖質</span>
-        <span class="nutrition-val">${sugars.toFixed(1)}g <span class="nutrition-target">/ 目安${sTarget}g</span></span>
+        <span class="nutrition-name sugars-label">${badge(cs)}糖質</span>
+        <span class="nutrition-val">${sugars.toFixed(1)}g <span class="nutrition-target">/ 目安${sTarget}g以内</span></span>
       </div>
       <div class="nutrition-bar-bg"><div class="nutrition-bar sugars-bar" style="width:${pct(sugars,sTarget)}%"></div></div>
     </div>
     <div class="nutrition-row">
       <div class="nutrition-label">
-        <span class="nutrition-name fiber-label">食物繊維</span>
-        <span class="nutrition-val">${fib.toFixed(1)}g <span class="nutrition-target">/ 目標${fibTarget}g</span></span>
+        <span class="nutrition-name fiber-label">${badge(cfib)}食物繊維</span>
+        <span class="nutrition-val">${fib.toFixed(1)}g <span class="nutrition-target">/ 目標${fibTarget}g以上</span></span>
       </div>
       <div class="nutrition-bar-bg"><div class="nutrition-bar fiber-bar" style="width:${pct(fib,fibTarget)}%"></div></div>
     </div>`;
