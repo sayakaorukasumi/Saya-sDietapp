@@ -538,6 +538,44 @@ footer {
   padding-bottom: 24px;
 }
 
+/* 栄養バランス */
+.nutrition-row { margin-bottom: 10px; }
+.nutrition-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  margin-bottom: 3px;
+}
+.nutrition-name { font-weight: bold; }
+.nutrition-val { color: var(--text-sub); font-size: 12px; }
+.nutrition-target { font-size: 10px; }
+.nutrition-bar-bg {
+  height: 8px;
+  background: #f0e1e7;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.nutrition-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+.protein-bar { background: #e88aa1; }
+.fat-bar     { background: #e8c44a; }
+.carbs-bar   { background: #7cb8d8; }
+.fiber-bar   { background: #7cb87c; }
+.protein-label { color: #e88aa1; }
+.fat-label     { color: #c8a800; }
+.carbs-label   { color: #5ba8c8; }
+.fiber-label   { color: #5ca85c; }
+
+.partner-advice-mini {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }

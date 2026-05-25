@@ -233,7 +233,14 @@ function addFood() {
   const kcal = parseInt(document.getElementById("food-kcal-input").value);
   if (!name) { alert("食べたものを入力してね"); return; }
   if (!kcal || kcal <= 0) { alert("カロリーを入力してね"); return; }
-  pendingMeals.push({ timing, name, kcal });
+  const dbMatch = FOOD_DATABASE.find(f => f.name === name);
+  pendingMeals.push({
+    timing, name, kcal,
+    protein: dbMatch?.protein ?? null,
+    fat: dbMatch?.fat ?? null,
+    carbs: dbMatch?.carbs ?? null,
+    fiber: dbMatch?.fiber ?? null,
+  });
   document.getElementById("food-name-input").value = "";
   document.getElementById("food-kcal-input").value = "";
   renderFoodList();
@@ -450,6 +457,93 @@ function renderCalorieBalance() {
   const sign = balance > 0 ? "+" : "";
   balEl.textContent = `${sign}${balance} kcal`;
   balEl.className = balance > 500 ? "surplus" : balance < -200 ? "deficit" : "";
+}
+
+// ---------- 栄養バランス ----------
+function renderNutritionBalance() {
+  const records = loadRecords();
+  const dateStr = document.getElementById("date-input").value || todayStr();
+  const meals = records[dateStr]?.meals || [];
+  const el = document.getElementById("nutrition-display");
+  const adviceEl = document.getElementById("nutrition-partner-advice");
+
+  if (!meals.length) {
+    el.innerHTML = '<p class="stat-empty">食事を記録すると表示されます</p>';
+    adviceEl.innerHTML = "";
+    return;
+  }
+
+  let p = 0, f = 0, c = 0, fib = 0, hasData = false;
+  meals.forEach(m => {
+    const src = (m.protein != null) ? m : (FOOD_DATABASE.find(d => d.name === m.name) || {});
+    if (src.protein != null) { p += src.protein; hasData = true; }
+    if (src.fat != null) f += src.fat;
+    if (src.carbs != null) c += src.carbs;
+    if (src.fiber != null) fib += src.fiber;
+  });
+
+  if (!hasData) {
+    el.innerHTML = '<p class="stat-empty">データベース内の食品を記録するとバランスが表示されます</p>';
+    adviceEl.innerHTML = "";
+    return;
+  }
+
+  const kcalTarget = getKcalTarget();
+  const pTarget = Math.round(kcalTarget * 0.20 / 4);
+  const fTarget = Math.round(kcalTarget * 0.25 / 9);
+  const cTarget = Math.round(kcalTarget * 0.55 / 4);
+  const fibTarget = 18;
+  const pct = (val, tgt) => Math.min(Math.round(val / tgt * 100), 100);
+
+  el.innerHTML = `
+    <div class="nutrition-row">
+      <div class="nutrition-label">
+        <span class="nutrition-name protein-label">たんぱく質</span>
+        <span class="nutrition-val">${p.toFixed(1)}g <span class="nutrition-target">/ 目安${pTarget}g</span></span>
+      </div>
+      <div class="nutrition-bar-bg"><div class="nutrition-bar protein-bar" style="width:${pct(p,pTarget)}%"></div></div>
+    </div>
+    <div class="nutrition-row">
+      <div class="nutrition-label">
+        <span class="nutrition-name fat-label">脂質</span>
+        <span class="nutrition-val">${f.toFixed(1)}g <span class="nutrition-target">/ 目安${fTarget}g</span></span>
+      </div>
+      <div class="nutrition-bar-bg"><div class="nutrition-bar fat-bar" style="width:${pct(f,fTarget)}%"></div></div>
+    </div>
+    <div class="nutrition-row">
+      <div class="nutrition-label">
+        <span class="nutrition-name carbs-label">炭水化物</span>
+        <span class="nutrition-val">${c.toFixed(1)}g <span class="nutrition-target">/ 目安${cTarget}g</span></span>
+      </div>
+      <div class="nutrition-bar-bg"><div class="nutrition-bar carbs-bar" style="width:${pct(c,cTarget)}%"></div></div>
+    </div>
+    <div class="nutrition-row">
+      <div class="nutrition-label">
+        <span class="nutrition-name fiber-label">食物繊維</span>
+        <span class="nutrition-val">${fib.toFixed(1)}g <span class="nutrition-target">/ 目標${fibTarget}g</span></span>
+      </div>
+      <div class="nutrition-bar-bg"><div class="nutrition-bar fiber-bar" style="width:${pct(fib,fibTarget)}%"></div></div>
+    </div>`;
+
+  const category = p < pTarget * 0.5 ? "nutrition_low_protein"
+    : fib < 6 ? "nutrition_low_fiber"
+    : "nutrition_balanced";
+
+  adviceEl.innerHTML = `
+    <div class="mini-partner">
+      <img class="mini-icon" src="${PARTNERS.kaoru.icon}" alt="${PARTNERS.kaoru.name}" onerror="this.src='images/placeholder-kaoru.svg'" />
+      <div class="partner-body">
+        <div class="partner-name">${PARTNERS.kaoru.name}</div>
+        <div class="speech-bubble">${pickLine(PARTNERS.kaoru, category)}</div>
+      </div>
+    </div>
+    <div class="mini-partner" style="margin-top:8px">
+      <img class="mini-icon" src="${PARTNERS.kasumi.icon}" alt="${PARTNERS.kasumi.name}" onerror="this.src='images/placeholder-kasumi.svg'" />
+      <div class="partner-body">
+        <div class="partner-name">${PARTNERS.kasumi.name}</div>
+        <div class="speech-bubble kasumi">${pickLine(PARTNERS.kasumi, category)}</div>
+      </div>
+    </div>`;
 }
 
 // ---------- コンディション ----------
