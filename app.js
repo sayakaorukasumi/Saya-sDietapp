@@ -493,6 +493,8 @@ function renderNutritionBalance() {
   const fTarget = Math.round(kcalTarget * 0.25 / 9);
   const cTarget = Math.round(kcalTarget * 0.55 / 4);
   const fibTarget = 18;
+  const sugars = Math.max(0, c - fib);
+  const sTarget = Math.max(1, cTarget - fibTarget);
   const pct = (val, tgt) => Math.min(Math.round(val / tgt * 100), 100);
 
   el.innerHTML = `
@@ -516,6 +518,13 @@ function renderNutritionBalance() {
         <span class="nutrition-val">${c.toFixed(1)}g <span class="nutrition-target">/ 目安${cTarget}g</span></span>
       </div>
       <div class="nutrition-bar-bg"><div class="nutrition-bar carbs-bar" style="width:${pct(c,cTarget)}%"></div></div>
+    </div>
+    <div class="nutrition-row">
+      <div class="nutrition-label">
+        <span class="nutrition-name sugars-label">糖質</span>
+        <span class="nutrition-val">${sugars.toFixed(1)}g <span class="nutrition-target">/ 目安${sTarget}g</span></span>
+      </div>
+      <div class="nutrition-bar-bg"><div class="nutrition-bar sugars-bar" style="width:${pct(sugars,sTarget)}%"></div></div>
     </div>
     <div class="nutrition-row">
       <div class="nutrition-label">

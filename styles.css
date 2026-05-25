@@ -564,10 +564,12 @@ footer {
 .protein-bar { background: #e88aa1; }
 .fat-bar     { background: #e8c44a; }
 .carbs-bar   { background: #7cb8d8; }
+.sugars-bar  { background: #f0a060; }
 .fiber-bar   { background: #7cb87c; }
 .protein-label { color: #e88aa1; }
 .fat-label     { color: #c8a800; }
 .carbs-label   { color: #5ba8c8; }
+.sugars-label  { color: #d07030; }
 .fiber-label   { color: #5ca85c; }
 
 .partner-advice-mini {
