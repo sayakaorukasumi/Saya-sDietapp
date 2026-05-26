@@ -253,6 +253,28 @@ main {
   padding: 1px 5px;
   margin-right: 2px;
 }
+.food-item { display: block; }
+.food-item-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.food-nut-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 5px;
+}
+.nut-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.nut-p   { background: #fce8ef; color: #c06070; }
+.nut-f   { background: #fdf5d9; color: #9a7800; }
+.nut-c   { background: #e6f2fb; color: #3a7aa0; }
+.nut-fib { background: #e8f5e8; color: #3a7a3a; }
 
 /* 食事入力行 */
 .meal-row {
