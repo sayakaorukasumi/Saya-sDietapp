@@ -262,10 +262,22 @@ function addFood() {
 
 function renderFoodList() {
   const ul = document.getElementById("food-list");
-  ul.innerHTML = pendingMeals.map((m, i) => `<li>
-    <span><span class="timing-badge">${m.timing}</span> ${m.name} <span class="kcal-badge">${m.kcal}kcal</span></span>
-    <button class="remove" data-i="${i}" aria-label="削除">×</button>
-  </li>`).join("");
+  ul.innerHTML = pendingMeals.map((m, i) => {
+    const src = (m.protein != null) ? m : (FOOD_DATABASE.find(d => d.name === m.name) || {});
+    const nuts = [];
+    if (src.protein != null) nuts.push(`<span class="nut-tag nut-p">P ${src.protein}g</span>`);
+    if (src.fat     != null) nuts.push(`<span class="nut-tag nut-f">脂 ${src.fat}g</span>`);
+    if (src.carbs   != null) nuts.push(`<span class="nut-tag nut-c">炭 ${src.carbs}g</span>`);
+    if (src.fiber   != null) nuts.push(`<span class="nut-tag nut-fib">繊 ${src.fiber}g</span>`);
+    const nutRow = nuts.length ? `<div class="food-nut-row">${nuts.join("")}</div>` : "";
+    return `<li class="food-item">
+      <div class="food-item-main">
+        <span><span class="timing-badge">${m.timing}</span> ${m.name} <span class="kcal-badge">${m.kcal}kcal</span></span>
+        <button class="remove" data-i="${i}" aria-label="削除">×</button>
+      </div>
+      ${nutRow}
+    </li>`;
+  }).join("");
   ul.querySelectorAll(".remove").forEach(b => {
     b.addEventListener("click", () => {
       pendingMeals.splice(parseInt(b.dataset.i), 1);
