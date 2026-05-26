@@ -268,6 +268,10 @@ function renderFoodList() {
     if (src.protein != null) nuts.push(`<span class="nut-tag nut-p">P ${src.protein}g</span>`);
     if (src.fat     != null) nuts.push(`<span class="nut-tag nut-f">脂 ${src.fat}g</span>`);
     if (src.carbs   != null) nuts.push(`<span class="nut-tag nut-c">炭 ${src.carbs}g</span>`);
+    if (src.carbs   != null) {
+      const s = Math.max(0, src.carbs - (src.fiber || 0));
+      nuts.push(`<span class="nut-tag nut-s">糖 ${s.toFixed(1)}g</span>`);
+    }
     if (src.fiber   != null) nuts.push(`<span class="nut-tag nut-fib">繊 ${src.fiber}g</span>`);
     const nutRow = nuts.length ? `<div class="food-nut-row">${nuts.join("")}</div>` : "";
     return `<li class="food-item">
