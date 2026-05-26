@@ -46,7 +46,7 @@ const FOOD_DATABASE = [
   { name: "柿ピー（少し）",               kcal: 50,  protein: 1.5, fat: 2.0, carbs: 7.0, fiber: 0.5 },
   { name: "大豆の入り焼き（少し）",        kcal: 40,  protein: 3.0, fat: 2.0, carbs: 3.0, fiber: 1.0 },
   { name: "飴（4粒）",                    kcal: 60,  protein: 0.0, fat: 0.0, carbs: 15.0, fiber: 0.0 },
-  { name: "チョコ（4粒）",                kcal: 70,  protein: 1.0, fat: 4.0, carbs: 8.0, fiber: 0.5 },
+  { name: "チョコ（4粒）",                kcal: 110, protein: 1.5, fat: 7.0, carbs: 11.5, fiber: 0.5 },
   { name: "堅焼きポテト（少し）",          kcal: 60,  protein: 1.0, fat: 3.0, carbs: 8.0, fiber: 0.5 },
   { name: "かりんとう（少し）",            kcal: 50,  protein: 0.8, fat: 1.5, carbs: 9.0, fiber: 0.3 },
   { name: "ムーンライト（1つ）",           kcal: 35,  protein: 0.5, fat: 1.5, carbs: 5.0, fiber: 0.1 },
