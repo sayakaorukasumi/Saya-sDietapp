@@ -110,8 +110,8 @@
             <option>夕食</option>
             <option>間食</option>
           </select>
-          <input list="food-datalist" id="food-name-input" placeholder="食べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
-          <datalist id="food-datalist"></datalist>
+          <select id="food-select"><option value="">食べたものを選ぶ</option></select>
+          <input id="food-name-input" placeholder="食べたもの（名前を入力）" autocorrect="off" autocapitalize="off" autocomplete="off" style="display:none" />
           <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
           <button id="add-food-btn" class="ghost-btn">追加</button>
         </div>
