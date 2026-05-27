@@ -110,8 +110,8 @@
             <option>夕食</option>
             <option>間食</option>
           </select>
-          <input list="food-datalist" id="food-name-input" placeholder="食べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
-          <datalist id="food-datalist"></datalist>
+          <select id="food-select"><option value="">食べたものを選ぶ</option></select>
+          <input id="food-name-input" placeholder="食べたもの（名前を入力）" autocorrect="off" autocapitalize="off" autocomplete="off" style="display:none" />
           <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
           <button id="add-food-btn" class="ghost-btn">追加</button>
         </div>
@@ -121,7 +121,7 @@
             <input type="number" id="custom-protein" placeholder="たんぱく質g" step="0.1" min="0" />
             <input type="number" id="custom-fat" placeholder="脂質g" step="0.1" min="0" />
             <input type="number" id="custom-carbs" placeholder="炭水化物g" step="0.1" min="0" />
-            <input type="number" id="custom-fiber" placeholder="食物繊維 g" step="0.1" min="0" />
+            <input type="number" id="custom-fiber" placeholder="食物繊維g" step="0.1" min="0" />
           </div>
         </div>
         <ul id="food-list" class="item-list"></ul>
@@ -163,7 +163,7 @@
         <section class="card stat-mini">
           <h2>昨日との増減</h2>
           <div id="weight-diff-display">
-            <p class="stat-empty">体重を記録すると表示されます</p>
+            <p class="stat-empty">体重を2日分記録すると表示されます</p>
           </div>
         </section>
         <section class="card stat-mini streak-card">
