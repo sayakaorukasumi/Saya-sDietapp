@@ -7,6 +7,8 @@ const FOOD_DATABASE = [
   { name: "ご飯（大盛り）",               kcal: 360, protein: 5.5, fat: 0.7, carbs: 80.0, fiber: 0.7 },
   { name: "お弁当",                       kcal: 350, protein: 15.0, fat: 16.0, carbs: 54.0, fiber: 2.0 },
   { name: "エビマヨおにぎり（セブン）",   kcal: 214, protein: 6.0, fat: 8.0, carbs: 29.0, fiber: 0.5 },
+  { name: "コロッケ（セブン・1個）",      kcal: 155, protein: 2.8, fat: 9.5, carbs: 15.0, fiber: 1.0 },
+  { name: "揚げ鸟（セブン・1個）",        kcal: 240, protein: 16.0, fat: 15.0, carbs: 8.0, fiber: 0.5 },
   { name: "ラーメン",                     kcal: 500, protein: 18.0, fat: 18.0, carbs: 60.0, fiber: 2.0 },
   { name: "チャーハン",                   kcal: 600, protein: 14.0, fat: 20.0, carbs: 80.0, fiber: 1.0 },
   // タンパク質・おかず
