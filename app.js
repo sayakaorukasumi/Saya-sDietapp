@@ -136,36 +136,19 @@ function initExerciseSelect() {
 
 // ---------- 食事データリスト ----------
 function initFoodDatalist() {
-  const sel = document.getElementById("food-select");
-  sel.innerHTML = '<option value="">食べたものを選ぶ</option>'
-    + FOOD_DATABASE.map(f => `<option value="${f.name}">${f.name}</option>`).join("")
-    + '<option value="__custom__">手入力（リストにないとき）</option>';
-
-  sel.addEventListener("change", () => {
-    const val = sel.value;
-    const customRow = document.getElementById("custom-nutrition-row");
-    const nameInput = document.getElementById("food-name-input");
-    if (val === "__custom__") {
-      nameInput.style.display = "";
-      nameInput.value = "";
-      document.getElementById("food-kcal-input").value = "";
-      customRow.hidden = false;
-    } else if (val) {
-      const match = FOOD_DATABASE.find(f => f.name === val);
-      nameInput.style.display = "none";
-      if (match) document.getElementById("food-kcal-input").value = match.kcal;
-      customRow.hidden = true;
-    } else {
-      nameInput.style.display = "none";
-      document.getElementById("food-kcal-input").value = "";
-      customRow.hidden = true;
-    }
-  });
+  const dl = document.getElementById("food-datalist");
+  dl.innerHTML = FOOD_DATABASE.map(f => `<option value="${f.name}">`).join("");
 
   document.getElementById("food-name-input").addEventListener("input", e => {
     const val = e.target.value;
+    const match = FOOD_DATABASE.find(f => f.name === val);
     const customRow = document.getElementById("custom-nutrition-row");
-    customRow.hidden = !val.trim();
+    if (match) {
+      document.getElementById("food-kcal-input").value = match.kcal;
+      customRow.hidden = true;
+    } else {
+      customRow.hidden = !val.trim();
+    }
   });
 }
 
@@ -253,12 +236,9 @@ function renderExerciseList() {
 // ---------- 食事リスト ----------
 function addFood() {
   const timing = document.getElementById("meal-timing").value;
-  const sel = document.getElementById("food-select");
-  const name = sel.value === "__custom__"
-    ? document.getElementById("food-name-input").value.trim()
-    : sel.value;
+  const name = document.getElementById("food-name-input").value.trim();
   const kcal = parseInt(document.getElementById("food-kcal-input").value);
-  if (!name) { alert("食べたものを選ぶか、手入力してね"); return; }
+  if (!name) { alert("食べたものを入力してね"); return; }
   if (!kcal || kcal <= 0) { alert("カロリーを入力してね"); return; }
   const dbMatch = FOOD_DATABASE.find(f => f.name === name);
   const customRow = document.getElementById("custom-nutrition-row");
@@ -270,9 +250,7 @@ function addFood() {
     carbs:   dbMatch?.carbs   ?? (customRow.hidden ? null : readCustom("custom-carbs")),
     fiber:   dbMatch?.fiber   ?? (customRow.hidden ? null : readCustom("custom-fiber")),
   });
-  sel.value = "";
   document.getElementById("food-name-input").value = "";
-  document.getElementById("food-name-input").style.display = "none";
   document.getElementById("food-kcal-input").value = "";
   ["custom-protein","custom-fat","custom-carbs","custom-fiber"].forEach(id => {
     document.getElementById(id).value = "";
@@ -565,7 +543,7 @@ function renderNutritionBalance() {
   };
   let verdictText, verdictCls;
   if (goods >= 4)      { verdictText = "今日は痩せやすいバランス！";      verdictCls = "verdict-great"; }
-  else if (goods === 3){ verdictText = "惜しい！あと少しで理想バランス"; verdictCls = "verdict-good";  }
+  else if (goods === 3){ verdictText = "惚しい！あと少しで理想バランス"; verdictCls = "verdict-good";  }
   else if (goods === 2){ verdictText = "もう少し意識してみよう";           verdictCls = "verdict-warn";  }
   else                 { verdictText = "今日の食事を見直してみよう";       verdictCls = "verdict-bad";   }
 
