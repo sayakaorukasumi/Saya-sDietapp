@@ -9,6 +9,7 @@ const EXERCISE_OPTIONS = [
   { name: "ワイドスクワット",  defaultUnit: "rep", met: 5.0, kcalPerRep: 0.4  },
   { name: "ヒップリスト",      defaultUnit: "rep", met: 3.5, kcalPerRep: 0.25 },
   { name: "クランチ",          defaultUnit: "rep", met: 3.8, kcalPerRep: 0.3  },
+  { name: "ロシアンツイスト",  defaultUnit: "rep", met: 3.8, kcalPerRep: 0.3  },
   { name: "トゥータップ",      defaultUnit: "rep", met: 3.5, kcalPerRep: 0.2  },
   { name: "カーフレイズ",      defaultUnit: "rep", met: 3.0, kcalPerRep: 0.15 },
   { name: "バックアームリフト", defaultUnit: "rep", met: 3.0, kcalPerRep: 0.2  },
