@@ -173,6 +173,19 @@ function bindEvents() {
   document.getElementById("add-food-btn").addEventListener("click", addFood);
 
   document.getElementById("save-weight-btn").addEventListener("click", saveWeight);
+  document.getElementById("period-check").addEventListener("change", e => {
+    const dateStr = document.getElementById("date-input").value;
+    if (!dateStr) return;
+    const records = loadRecords();
+    if (!records[dateStr]) records[dateStr] = {};
+    if (e.target.checked) {
+      records[dateStr].period = true;
+    } else {
+      delete records[dateStr].period;
+    }
+    saveRecords(records);
+    renderStatsTab();
+  });
   document.getElementById("save-exercise-btn").addEventListener("click", saveExercise);
   document.getElementById("save-food-btn").addEventListener("click", saveMeals);
 
@@ -196,6 +209,7 @@ function bindEvents() {
 function loadDateData(dateStr) {
   const r = loadRecords()[dateStr];
   document.getElementById("weight-input").value = r?.weight ?? "";
+  document.getElementById("period-check").checked = !!r?.period;
 
   pendingExercises = r?.exercises ? r.exercises.map(normalizeExercise) : [];
   pendingMeals = r?.meals ? [...r.meals] : [];
@@ -315,6 +329,11 @@ function saveWeight() {
   const isFirstEver = Object.keys(records).length === 0;
   if (!records[dateStr]) records[dateStr] = {};
   records[dateStr].weight = weight;
+  if (document.getElementById("period-check").checked) {
+    records[dateStr].period = true;
+  } else {
+    delete records[dateStr].period;
+  }
   saveRecords(records);
 
   const diff = getWeightDiff(records, dateStr, weight);
@@ -543,7 +562,7 @@ function renderNutritionBalance() {
   };
   let verdictText, verdictCls;
   if (goods >= 4)      { verdictText = "今日は痩せやすいバランス！";      verdictCls = "verdict-great"; }
-  else if (goods === 3){ verdictText = "惚しい！あと少しで理想バランス"; verdictCls = "verdict-good";  }
+  else if (goods === 3){ verdictText = "惜しい！あと少しで理想バランス"; verdictCls = "verdict-good";  }
   else if (goods === 2){ verdictText = "もう少し意識してみよう";           verdictCls = "verdict-warn";  }
   else                 { verdictText = "今日の食事を見直してみよう";       verdictCls = "verdict-bad";   }
 
@@ -681,6 +700,28 @@ function renderChart(range = "7") {
 
   const labels = filtered.map(([d]) => d.slice(5));
   const data = filtered.map(([, r]) => r.weight);
+  const periodFlags = filtered.map(([d]) => !!records[d]?.period);
+  const hasPeriod = periodFlags.some(Boolean);
+
+  const periodBandPlugin = {
+    id: "periodBand",
+    beforeDatasetsDraw(chart) {
+      const { ctx: c, chartArea: { top, bottom }, scales: { x } } = chart;
+      if (!x) return;
+      const n = periodFlags.length;
+      const halfBand = n > 1
+        ? Math.abs(x.getPixelForValue(1) - x.getPixelForValue(0)) / 2
+        : x.width / 2;
+      periodFlags.forEach((isPeriod, i) => {
+        if (!isPeriod) return;
+        const xPos = x.getPixelForValue(i);
+        c.save();
+        c.fillStyle = "rgba(212, 112, 162, 0.13)";
+        c.fillRect(xPos - halfBand, top, halfBand * 2, bottom - top);
+        c.restore();
+      });
+    }
+  };
 
   const datasets = [{
     label: "体重 (kg)",
@@ -689,8 +730,10 @@ function renderChart(range = "7") {
     backgroundColor: "rgba(245,163,182,0.2)",
     tension: 0.3,
     fill: true,
-    pointBackgroundColor: "#e88aa1",
-    pointRadius: 4,
+    pointBackgroundColor: periodFlags.map(p => p ? "#d470a2" : "#e88aa1"),
+    pointBorderColor:     periodFlags.map(p => p ? "#a03070" : "#e88aa1"),
+    pointRadius:          periodFlags.map(p => p ? 6 : 4),
+    pointBorderWidth:     periodFlags.map(p => p ? 2 : 1),
   }];
 
   if (profile.targetWeight && labels.length > 0) {
@@ -711,10 +754,31 @@ function renderChart(range = "7") {
   chartInstance = new Chart(ctx, {
     type: "line",
     data: { labels, datasets },
+    plugins: hasPeriod ? [periodBandPlugin] : [],
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: !!profile.targetWeight } },
+      plugins: {
+        legend: {
+          display: !!profile.targetWeight || hasPeriod,
+          labels: {
+            generateLabels(chart) {
+              const base = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+              if (hasPeriod) {
+                base.push({
+                  text: "🌸 生理中",
+                  fillStyle: "rgba(212,112,162,0.25)",
+                  strokeStyle: "#d470a2",
+                  lineWidth: 1,
+                  hidden: false,
+                  datasetIndex: -1,
+                });
+              }
+              return base;
+            }
+          }
+        }
+      },
       scales: {
         y: { ticks: { color: "#8a7c83" }, grid: { color: "#f0e1e7" } },
         x: { ticks: { color: "#8a7c83" }, grid: { display: false } },
@@ -760,8 +824,9 @@ function renderHistory() {
     if (intakeKcal > 0) sub.push(`摂取 ${intakeKcal}kcal`);
     const subHtml = sub.length ? `<div class="history-kcal">${sub.join(" / ")}</div>` : "";
 
+    const periodMark = r.period ? '<span class="period-badge">🌸</span>' : "";
     return `<div class="history-item">
-      <div class="history-date">${formatDateJa(date)}</div>
+      <div class="history-date">${formatDateJa(date)}${periodMark}</div>
       <div class="history-detail">${parts.join(" / ") || "—"}</div>
       ${subHtml}
     </div>`;

@@ -659,6 +659,28 @@ footer {
   border-top: 1px dashed var(--border);
 }
 
+.period-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #c060a0;
+  user-select: none;
+}
+.period-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #d470a2;
+  cursor: pointer;
+}
+
+.period-badge {
+  font-size: 13px;
+  margin-left: 2px;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
