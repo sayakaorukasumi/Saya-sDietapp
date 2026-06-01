@@ -131,7 +131,15 @@ function initExerciseSelect() {
   sel.addEventListener("change", () => {
     const def = EXERCISE_OPTIONS.find(e => e.name === sel.value);
     if (def) { currentUnit = def.defaultUnit; updateUnitUI(); }
+    updateExerciseDesc();
   });
+  updateExerciseDesc();
+}
+
+function updateExerciseDesc() {
+  const sel = document.getElementById("exercise-select");
+  const def = EXERCISE_OPTIONS.find(e => e.name === sel.value);
+  document.getElementById("exercise-desc").textContent = def?.desc || "";
 }
 
 // ---------- 食事データリスト ----------
