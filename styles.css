@@ -213,6 +213,14 @@ main {
 }
 .unit-btn.rep { background: var(--accent-dark); }
 
+.exercise-desc {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin: -2px 0 6px 2px;
+  min-height: 16px;
+  line-height: 1.5;
+}
+
 /* リスト（運動・食事） */
 .item-list {
   list-style: none;
