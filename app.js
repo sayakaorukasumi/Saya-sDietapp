@@ -194,6 +194,19 @@ function bindEvents() {
     saveRecords(records);
     renderStatsTab();
   });
+  document.getElementById("after-dinner-check").addEventListener("change", e => {
+    const dateStr = document.getElementById("date-input").value;
+    if (!dateStr) return;
+    const records = loadRecords();
+    if (!records[dateStr]) records[dateStr] = {};
+    if (e.target.checked) {
+      records[dateStr].afterDinner = true;
+    } else {
+      delete records[dateStr].afterDinner;
+    }
+    saveRecords(records);
+    renderStatsTab();
+  });
   document.getElementById("save-exercise-btn").addEventListener("click", saveExercise);
   document.getElementById("save-food-btn").addEventListener("click", saveMeals);
 
@@ -218,6 +231,7 @@ function loadDateData(dateStr) {
   const r = loadRecords()[dateStr];
   document.getElementById("weight-input").value = r?.weight ?? "";
   document.getElementById("period-check").checked = !!r?.period;
+  document.getElementById("after-dinner-check").checked = !!r?.afterDinner;
 
   pendingExercises = r?.exercises ? r.exercises.map(normalizeExercise) : [];
   pendingMeals = r?.meals ? [...r.meals] : [];
@@ -341,6 +355,11 @@ function saveWeight() {
     records[dateStr].period = true;
   } else {
     delete records[dateStr].period;
+  }
+  if (document.getElementById("after-dinner-check").checked) {
+    records[dateStr].afterDinner = true;
+  } else {
+    delete records[dateStr].afterDinner;
   }
   saveRecords(records);
 
@@ -709,7 +728,9 @@ function renderChart(range = "7") {
   const labels = filtered.map(([d]) => d.slice(5));
   const data = filtered.map(([, r]) => r.weight);
   const periodFlags = filtered.map(([d]) => !!records[d]?.period);
+  const afterDinnerFlags = filtered.map(([d]) => !!records[d]?.afterDinner);
   const hasPeriod = periodFlags.some(Boolean);
+  const hasAfterDinner = afterDinnerFlags.some(Boolean);
 
   const periodBandPlugin = {
     id: "periodBand",
@@ -726,6 +747,27 @@ function renderChart(range = "7") {
         c.save();
         c.fillStyle = "rgba(212, 112, 162, 0.13)";
         c.fillRect(xPos - halfBand, top, halfBand * 2, bottom - top);
+        c.restore();
+      });
+    }
+  };
+
+  const afterDinnerEmojiPlugin = {
+    id: "afterDinnerEmoji",
+    afterDatasetsDraw(chart) {
+      const { ctx: c, scales: { x, y } } = chart;
+      if (!x || !y) return;
+      afterDinnerFlags.forEach((isAD, i) => {
+        if (!isAD) return;
+        const val = data[i];
+        if (val == null) return;
+        const xPos = x.getPixelForValue(i);
+        const yPos = y.getPixelForValue(val);
+        c.save();
+        c.font = "13px sans-serif";
+        c.textAlign = "center";
+        c.textBaseline = "bottom";
+        c.fillText("🍽", xPos, yPos - 6);
         c.restore();
       });
     }
@@ -762,13 +804,16 @@ function renderChart(range = "7") {
   chartInstance = new Chart(ctx, {
     type: "line",
     data: { labels, datasets },
-    plugins: hasPeriod ? [periodBandPlugin] : [],
+    plugins: [
+      ...(hasPeriod ? [periodBandPlugin] : []),
+      ...(hasAfterDinner ? [afterDinnerEmojiPlugin] : []),
+    ],
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: !!profile.targetWeight || hasPeriod,
+          display: !!profile.targetWeight || hasPeriod || hasAfterDinner,
           labels: {
             generateLabels(chart) {
               const base = Chart.defaults.plugins.legend.labels.generateLabels(chart);
@@ -777,6 +822,16 @@ function renderChart(range = "7") {
                   text: "🌸 生理中",
                   fillStyle: "rgba(212,112,162,0.25)",
                   strokeStyle: "#d470a2",
+                  lineWidth: 1,
+                  hidden: false,
+                  datasetIndex: -1,
+                });
+              }
+              if (hasAfterDinner) {
+                base.push({
+                  text: "🍽 夕食後測定",
+                  fillStyle: "rgba(192,136,64,0.2)",
+                  strokeStyle: "#c08840",
                   lineWidth: 1,
                   hidden: false,
                   datasetIndex: -1,
@@ -833,8 +888,9 @@ function renderHistory() {
     const subHtml = sub.length ? `<div class="history-kcal">${sub.join(" / ")}</div>` : "";
 
     const periodMark = r.period ? '<span class="period-badge">🌸</span>' : "";
+    const afterDinnerMark = r.afterDinner ? '<span class="after-dinner-badge">🍽</span>' : "";
     return `<div class="history-item">
-      <div class="history-date">${formatDateJa(date)}${periodMark}</div>
+      <div class="history-date">${formatDateJa(date)}${periodMark}${afterDinnerMark}</div>
       <div class="history-detail">${parts.join(" / ") || "—"}</div>
       ${subHtml}
     </div>`;

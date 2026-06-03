@@ -667,11 +667,17 @@ footer {
   border-top: 1px dashed var(--border);
 }
 
+.check-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 10px;
+}
+
 .period-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
   cursor: pointer;
   font-size: 14px;
   color: #c060a0;
@@ -684,7 +690,24 @@ footer {
   cursor: pointer;
 }
 
-.period-badge {
+.after-dinner-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #7a5500;
+  user-select: none;
+}
+.after-dinner-label input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #c08840;
+  cursor: pointer;
+}
+
+.period-badge,
+.after-dinner-badge {
   font-size: 13px;
   margin-left: 2px;
 }
