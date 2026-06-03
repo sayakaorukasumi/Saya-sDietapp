@@ -42,10 +42,16 @@
           <input type="number" id="weight-input" step="0.1" min="0" placeholder="kg を入力" />
           <button id="save-weight-btn" class="record-btn">記録する</button>
         </div>
-        <label class="period-label">
-          <input type="checkbox" id="period-check" />
-          <span>🌸 生理中</span>
-        </label>
+        <div class="check-row">
+          <label class="period-label">
+            <input type="checkbox" id="period-check" />
+            <span>🌸 生理中</span>
+          </label>
+          <label class="after-dinner-label">
+            <input type="checkbox" id="after-dinner-check" />
+            <span>🍽 夕食後に測定</span>
+          </label>
+        </div>
       </section>
       <div class="partner-inline" id="partner-comment-weight" hidden>
         <div class="mini-partner">
