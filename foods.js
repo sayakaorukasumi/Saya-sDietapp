@@ -47,7 +47,7 @@ const FOOD_DATABASE = [
   { name: "SAVASプロテイン＋低脂肪乳（ミニシェイカー）", kcal: 165, protein: 24.0, fat: 3.0, carbs: 9.0, fiber: 0.6 },
   { name: "低脂肪乳＋青汁（ミニシェイカー）",          kcal: 85,  protein: 4.8, fat: 1.3, carbs: 12.5, fiber: 2.5 },
   { name: "しゃりもにグミ（3粒）",        kcal: 15,  protein: 0.0, fat: 0.0, carbs: 4.0, fiber: 0.0 },
-  { name: "柿ピー（少し）",               kcal: 50,  protein: 1.5, fat: 2.0, carbs: 7.0, fiber: 0.5 },
+  { name: "柿の種のみ（約40g）",           kcal: 157, protein: 2.5, fat: 0.8, carbs: 34.9, fiber: 1.2 },
   { name: "煎り大豆（約27g）",              kcal: 117, protein: 11.1, fat: 5.2, carbs: 8.8, fiber: 4.6 },
   { name: "飴（4粒）",                    kcal: 60,  protein: 0.0, fat: 0.0, carbs: 15.0, fiber: 0.0 },
   { name: "チョコ（4粒）",                kcal: 110, protein: 1.5, fat: 7.0, carbs: 11.5, fiber: 0.5 },
