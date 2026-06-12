@@ -49,6 +49,7 @@ const FOOD_DATABASE = [
   { name: "しゃりもにグミ（3粒）",        kcal: 15,  protein: 0.0, fat: 0.0, carbs: 4.0, fiber: 0.0 },
   { name: "柿の種のみ（約40g）",           kcal: 157, protein: 2.5, fat: 0.8, carbs: 34.9, fiber: 1.2 },
   { name: "煎り大豆（約27g）",              kcal: 117, protein: 11.1, fat: 5.2, carbs: 8.8, fiber: 4.6 },
+  { name: "ドライフルーツ（4欠片）",         kcal: 30,  protein: 0.1, fat: 0.0, carbs: 7.5, fiber: 0.5 },
   { name: "飴（4粒）",                    kcal: 60,  protein: 0.0, fat: 0.0, carbs: 15.0, fiber: 0.0 },
   { name: "チョコ（4粒）",                kcal: 110, protein: 1.5, fat: 7.0, carbs: 11.5, fiber: 0.5 },
   { name: "堅焼きポテト（少し）",          kcal: 60,  protein: 1.0, fat: 3.0, carbs: 8.0, fiber: 0.5 },
