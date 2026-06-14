@@ -17,5 +17,7 @@ const EXERCISE_OPTIONS = [
   { name: "有酸素ダンス",      defaultUnit: "min", met: 6.0, kcalPerRep: null, desc: null },
   { name: "ウォーキング",      defaultUnit: "min", met: 3.5, kcalPerRep: null, desc: null },
   { name: "軽めのランニング",  defaultUnit: "min", met: 6.0, kcalPerRep: null, desc: null },
-  { name: "その他",            defaultUnit: "min", met: 3.0, kcalPerRep: 0.3,  desc: null },
+  { name: "ロウイング",                  defaultUnit: "rep", met: 3.8, kcalPerRep: 0.3,  desc: "座って脇を締め手のひらを上に・肘を引いて肩甲骨を寄せる・背中に効く" },
+  { name: "サイドライイングアダクション", defaultUnit: "rep", met: 3.0, kcalPerRep: 0.2,  desc: "横向きに寝て上の膝を立て、下の足を足の隙間から上下させる・太ももの内側に効く" },
+  { name: "その他",                      defaultUnit: "min", met: 3.0, kcalPerRep: 0.3,  desc: null },
 ];
