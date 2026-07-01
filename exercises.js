@@ -13,6 +13,7 @@ const EXERCISE_OPTIONS = [
   { name: "ロシアンツイスト",  defaultUnit: "rep", met: 3.8, kcalPerRep: 0.3,  desc: "座って上体を左右にひねる・わき腹・腹斜筋に効く" },
   { name: "バイシクルクランチ", defaultUnit: "rep", met: 3.8, kcalPerRep: 0.3,  desc: "仰向けで頭に手を当て、肘と反対の膝を交互にお腹に引き寄せる・わき腹・腹斜筋に効く" },
   { name: "トゥータップ",      defaultUnit: "rep", met: 3.5, kcalPerRep: 0.2,  desc: "仰向けで足を上げてつま先を交互に下ろす・下腹部に効く" },
+  { name: "レッグレイズ",      defaultUnit: "rep", met: 3.8, kcalPerRep: 0.3,  desc: "仰向けで両足を揃えてまっすぐ上げ下げする・下腹部に効く" },
   { name: "カーフレイズ",      defaultUnit: "rep", met: 3.0, kcalPerRep: 0.15, desc: "つま先立ちを繰り返す・ふくらはぎを鍛える" },
   { name: "バックアームリフト", defaultUnit: "rep", met: 3.0, kcalPerRep: 0.2,  desc: "うつ伏せで腕を後ろに持ち上げる・背中・肩周りに効く" },
   { name: "有酸素ダンス",      defaultUnit: "min", met: 6.0, kcalPerRep: null, desc: null },
