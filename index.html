@@ -3,286 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>さやのダイエット記録</title>
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="images/22A6845C-2D64-4F1F-9AAF-5848DA652972.png" />
+  <meta name="theme-color" content="#f5a3b6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="さやのダイエット" />
-  <meta name="theme-color" content="#f5a3b6" />
+  <title>さやのダイエット記録</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="images/22A6845C-2D64-4F1F-9AAF-5848DA652972.png" />
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+  <script src="partners.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <header class="app-header">
-    <h1>さやのダイエット記録</h1>
-  </header>
-
-  <nav class="tab-nav">
-    <button class="tab-btn active" data-tab="record">記録</button>
-    <button class="tab-btn" data-tab="stats">増減など</button>
-    <button class="tab-btn" data-tab="profile">マイ情報</button>
+  <header class="app-header"><h1>さやのダイエット記録</h1><p class="header-sub">小さな変化を、わたしのペースで ♡</p></header>
+  <nav class="tab-nav" aria-label="アプリのメニュー">
+    <button type="button" class="tab-btn active" data-tab="record" aria-selected="true">体重記録</button>
+    <button type="button" class="tab-btn" data-tab="stats" aria-selected="false">体重グラフ</button>
+    <button type="button" class="tab-btn" data-tab="measurements" aria-selected="false">身体サイズ</button>
+    <button type="button" class="tab-btn" data-tab="profile" aria-selected="false">マイ情報</button>
   </nav>
-
   <main>
-
-    <!-- ===== ① 記録タブ ===== -->
     <div id="tab-record" class="tab-content active">
-
-      <!-- 日付バー -->
-      <div class="date-bar card">
-        <label for="date-input">日付</label>
-        <input type="date" id="date-input" />
-      </div>
-
-      <!-- 体重 -->
+      <div class="date-bar card"><label for="date-input">記録する日</label><input type="date" id="date-input" /></div>
       <section class="card record-section">
         <h2>体重</h2>
-        <div class="row-inline">
-          <input type="number" id="weight-input" step="0.1" min="0" placeholder="kg を入力" />
-          <button id="save-weight-btn" class="record-btn">記録する</button>
+        <div class="row-inline weight-entry">
+          <input type="number" id="weight-input" step="0.1" min="0.1" max="500" inputmode="decimal" placeholder="kg を入力" aria-label="体重（kg）" />
+          <button type="button" id="save-weight-btn" class="record-btn">記録する</button>
         </div>
         <div class="check-row">
-          <label class="period-label">
-            <input type="checkbox" id="period-check" />
-            <span>🌸 生理中</span>
-          </label>
-          <label class="after-dinner-label">
-            <input type="checkbox" id="after-dinner-check" />
-            <span>🍽 夕食後に測定</span>
-          </label>
+          <label class="period-label"><input type="checkbox" id="period-check" /><span>🌸 生理中</span></label>
+          <label class="after-dinner-label"><input type="checkbox" id="after-dinner-check" /><span>🍽 夕食後に測定</span></label>
         </div>
       </section>
-      <div class="partner-inline" id="partner-comment-weight" hidden>
+      <div class="partner-inline" id="partner-comment-weight" hidden aria-live="polite">
         <div class="mini-partner">
           <img class="mini-icon" src="images/IMG_2170.webp" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
-          <div class="partner-body">
-            <div class="partner-name">薫</div>
-            <div class="speech-bubble" id="inline-kaoru-weight">…</div>
-          </div>
+          <div class="partner-body"><div class="partner-name">薫</div><div class="speech-bubble" id="inline-kaoru-weight">…</div></div>
         </div>
         <div class="mini-partner">
           <img class="mini-icon" src="images/06F1DB6C-479F-45CF-A6BD-549C168E7F6A.jpeg" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
-          <div class="partner-body">
-            <div class="partner-name">霞</div>
-            <div class="speech-bubble kasumi" id="inline-kasumi-weight">…</div>
-          </div>
+          <div class="partner-body"><div class="partner-name">霞</div><div class="speech-bubble kasumi" id="inline-kasumi-weight">…</div></div>
         </div>
       </div>
+      <section class="card tip-card"><p>毎日の数字も、ゆっくりした変化も。<br />どちらも大切な記録だよ 🌷</p></section>
+    </div>
 
-      <!-- 運動 -->
-      <section class="card record-section">
-        <h2>運動</h2>
-        <div class="exercise-row">
-          <select id="exercise-select"></select>
-          <input type="number" id="exercise-value" min="0" placeholder="分" />
-          <button id="unit-toggle" class="unit-btn">分</button>
-          <button id="add-exercise" class="ghost-btn">追加</button>
-        </div>
-        <p id="exercise-desc" class="exercise-desc"></p>
-        <ul id="exercise-list" class="item-list"></ul>
-        <button id="save-exercise-btn" class="record-btn" style="width:100%;margin-top:4px">記録する</button>
-      </section>
-      <div class="partner-inline" id="partner-comment-exercise" hidden>
-        <div class="mini-partner">
-          <img class="mini-icon" src="images/IMG_2170.webp" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
-          <div class="partner-body">
-            <div class="partner-name">薫</div>
-            <div class="speech-bubble" id="inline-kaoru-exercise">…</div>
-          </div>
-        </div>
-        <div class="mini-partner">
-          <img class="mini-icon" src="images/06F1DB6C-479F-45CF-A6BD-549C168E7F6A.jpeg" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
-          <div class="partner-body">
-            <div class="partner-name">霞</div>
-            <div class="speech-bubble kasumi" id="inline-kasumi-exercise">…</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 食事 -->
-      <section class="card record-section">
-        <h2>食事</h2>
-        <!-- カロリーバー -->
-        <div class="calorie-bar-wrap">
-          <div class="calorie-bar-label">
-            <span>本日 <strong id="today-intake-kcal">0</strong> kcal</span>
-            <span>目標 <strong id="target-kcal-label">1500</strong> kcal</span>
-          </div>
-          <div class="calorie-bar">
-            <div class="calorie-fill" id="calorie-fill"></div>
-          </div>
-        </div>
-        <!-- 入力行 -->
-        <div class="meal-row">
-          <select id="meal-timing">
-            <option>朝食</option>
-            <option>昼食</option>
-            <option>夕食</option>
-            <option>間食</option>
-          </select>
-          <input list="food-datalist" id="food-name-input" placeholder="食べたもの（候補あり）" autocorrect="off" autocapitalize="off" autocomplete="off" />
-          <datalist id="food-datalist"></datalist>
-          <input type="number" id="food-kcal-input" placeholder="kcal" min="0" />
-          <button id="add-food-btn" class="ghost-btn">追加</button>
-        </div>
-        <div id="custom-nutrition-row" class="custom-nutrition-row" hidden>
-          <div class="custom-nutrition-label">栄養素（任意・手入力のとき）</div>
-          <div class="custom-nutrition-inputs">
-            <input type="number" id="custom-protein" placeholder="たんぱく質g" step="0.1" min="0" />
-            <input type="number" id="custom-fat" placeholder="脂質g" step="0.1" min="0" />
-            <input type="number" id="custom-carbs" placeholder="炭水化物g" step="0.1" min="0" />
-            <input type="number" id="custom-fiber" placeholder="食物繊維g" step="0.1" min="0" />
-          </div>
-        </div>
-        <ul id="food-list" class="item-list"></ul>
-        <button id="save-food-btn" class="record-btn" style="width:100%;margin-top:4px">記録する</button>
-      </section>
-      <div class="partner-inline" id="partner-comment-food" hidden>
-        <div class="mini-partner">
-          <img class="mini-icon" src="images/IMG_2170.webp" alt="薫" onerror="this.src='images/placeholder-kaoru.svg'" />
-          <div class="partner-body">
-            <div class="partner-name">薫</div>
-            <div class="speech-bubble" id="inline-kaoru-food">…</div>
-          </div>
-        </div>
-        <div class="mini-partner">
-          <img class="mini-icon" src="images/06F1DB6C-479F-45CF-A6BD-549C168E7F6A.jpeg" alt="霞" onerror="this.src='images/placeholder-kasumi.svg'" />
-          <div class="partner-body">
-            <div class="partner-name">霞</div>
-            <div class="speech-bubble kasumi" id="inline-kasumi-food">…</div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /tab-record -->
-
-    <!-- ===== ② 増減などタブ ===== -->
     <div id="tab-stats" class="tab-content">
-
-      <!-- コンディション -->
-      <section class="card condition-card">
-        <h2>今日のコンディション</h2>
-        <div id="condition-display">
-          <div class="condition-status neutral">記録してみよう</div>
-          <div class="condition-note">体重・運動・食事を記録すると表示されます</div>
-        </div>
-      </section>
-
-      <!-- 昨日比 + 連続日数 -->
-      <div class="stats-row">
-        <section class="card stat-mini">
-          <h2>昨日との増減</h2>
-          <div id="weight-diff-display">
-            <p class="stat-empty">体重を記録すると表示されます</p>
-          </div>
-        </section>
-        <section class="card stat-mini streak-card">
-          <h2>運動継続</h2>
-          <div class="streak-display">
-            <span class="streak-number" id="streak-number">0</span>
-            <span class="streak-label">日</span>
-          </div>
-          <p class="streak-sub" id="streak-sub"></p>
-        </section>
-      </div>
-
-      <!-- カロリー収支 -->
       <section class="card">
-        <h2>今日のカロリー収支</h2>
-        <div class="calorie-balance">
-          <div class="cal-row">
-            <span>摂取カロリー</span>
-            <strong><span id="stat-intake">0</span> kcal</strong>
-          </div>
-          <div class="cal-row">
-            <span>消費カロリー（運動）</span>
-            <strong><span id="stat-burned">0</span> kcal</strong>
-          </div>
-          <div class="cal-row cal-balance-row">
-            <span>収支</span>
-            <strong id="stat-balance-el">0 kcal</strong>
-          </div>
-        </div>
+        <h2>前回との体重増減</h2>
+        <div id="weight-diff-display"><p class="stat-empty">体重を2回記録すると表示されます</p></div>
       </section>
-
-      <!-- 栄養バランス -->
-      <section class="card">
-        <h2>今日の栄養バランス</h2>
-        <div id="nutrition-display"></div>
-        <div id="nutrition-partner-advice" class="partner-advice-mini"></div>
-      </section>
-
-      <!-- 体重グラフ -->
       <section class="card">
         <h2>体重の推移</h2>
-        <div class="chart-wrapper">
-          <canvas id="weight-chart"></canvas>
-        </div>
-        <div class="range-buttons">
-          <button data-range="7" class="range-btn active">1週間</button>
-          <button data-range="30" class="range-btn">1ヶ月</button>
-          <button data-range="90" class="range-btn">3ヶ月</button>
-          <button data-range="all" class="range-btn">全期間</button>
+        <div class="chart-wrapper"><canvas id="weight-chart" aria-label="体重推移の折れ線グラフ" role="img"></canvas></div>
+        <p class="chart-fallback" id="weight-chart-fallback" hidden>グラフを表示できませんでした。ネット接続を確認してみてね。</p>
+        <div class="range-buttons" aria-label="体重グラフの表示期間">
+          <button type="button" data-range="7" class="range-btn active">1週間</button>
+          <button type="button" data-range="30" class="range-btn">1ヶ月</button>
+          <button type="button" data-range="90" class="range-btn">3ヶ月</button>
+          <button type="button" data-range="all" class="range-btn">全期間</button>
         </div>
       </section>
+      <section class="card"><h2>体重の記録一覧</h2><div id="history-list" class="history-list"></div></section>
+    </div>
 
-      <!-- 記録一覧 -->
+    <div id="tab-measurements" class="tab-content">
+      <section class="card size-intro"><h2>身体サイズを記録</h2><p>くまさんメジャーで、月に一度のサイズチェック 🧸</p>
+        <label for="size-date-input">測定日</label><input type="date" id="size-date-input" />
+        <p class="input-note">気になるところだけ入力してもOK。単位はcm・小数第1位まで。</p>
+      </section>
+      <section class="card measure-card">
+        <h2>部位ごとのサイズ</h2>
+        <p class="size-helper">身体のまわりの入力欄に数字を入れてね</p>
+        <div class="body-map" aria-label="身体の部位とサイズ入力欄">
+          <div class="body-illustration" aria-hidden="true">
+            <svg viewBox="0 0 180 660" xmlns="http://www.w3.org/2000/svg" role="presentation">
+              <defs><linearGradient id="figureShade" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#f8dce5"/><stop offset="1" stop-color="#e6c0d3"/></linearGradient></defs>
+              <circle cx="90" cy="57" r="31" fill="#f8e3e2" stroke="#d6aab9" stroke-width="2"/>
+              <path d="M60 53 C59 15 79 13 90 15 C118 13 124 33 120 55 C108 43 106 31 96 32 C82 41 73 44 60 53Z" fill="#b6a3ac" opacity=".88"/>
+              <path d="M78 84 L78 100 Q89 107 102 100 L102 84" fill="#f8e3e2" stroke="#d6aab9" stroke-width="1.7"/>
+              <path d="M76 98 Q53 101 44 117 Q35 148 43 191 Q49 230 55 265 Q50 300 39 341 Q40 364 55 372 L125 372 Q140 362 141 341 Q129 299 125 265 Q131 230 137 191 Q145 148 136 117 Q126 101 104 98 Q90 121 76 98Z" fill="url(#figureShade)" stroke="#c894aa" stroke-width="2.2"/>
+              <path d="M45 120 Q32 127 27 159 L12 266 Q10 289 18 296 Q27 300 29 284 L51 202" fill="#f8dce5" stroke="#c894aa" stroke-width="2"/>
+              <path d="M135 120 Q148 127 153 159 L168 266 Q170 289 162 296 Q153 300 151 284 L129 202" fill="#f8dce5" stroke="#c894aa" stroke-width="2"/>
+              <path d="M52 363 Q48 401 56 461 L65 606 Q66 626 77 626 Q86 622 86 607 L89 401 L91 401 L94 607 Q94 622 103 626 Q114 626 115 606 L124 461 Q132 401 128 363Z" fill="url(#figureShade)" stroke="#c894aa" stroke-width="2.2"/>
+              <path d="M77 622 Q76 640 63 644 Q61 651 76 652 L91 649 Q91 639 86 620 M103 622 Q104 640 117 644 Q119 651 104 652 L89 649 Q89 639 94 620" fill="#f3d4e0" stroke="#c894aa" stroke-width="2"/>
+              <path d="M56 224 Q90 242 124 224 M54 277 Q90 289 126 277 M46 356 Q90 373 134 356" fill="none" stroke="#b9809d" stroke-width="1" stroke-dasharray="4 5" opacity=".7"/>
+              <circle cx="90" cy="18" r="5" fill="#fff" opacity=".8"/><path d="M36 75 l4 -6 l4 6 l-4 6Z M148 88 l4 -6 l4 6 l-4 6Z" fill="#e9b0c2"/>
+            </svg>
+          </div>
+          <div id="measurement-fields"></div>
+        </div>
+        <button type="button" id="save-size-btn" class="primary-btn">身体サイズを保存する</button>
+        <p class="profile-msg" id="size-saved-msg" aria-live="polite"></p>
+      </section>
       <section class="card">
-        <h2>記録一覧</h2>
-        <div id="history-list" class="history-list"></div>
+        <h2>身体サイズの推移</h2>
+        <div class="form-row"><label for="size-chart-part">グラフで見る部位</label><select id="size-chart-part"></select></div>
+        <div class="chart-wrapper size-chart-wrapper"><canvas id="size-chart" aria-label="身体サイズ推移の折れ線グラフ" role="img"></canvas></div>
+        <p class="chart-fallback" id="size-chart-fallback" hidden>グラフを表示できませんでした。ネット接続を確認してみてね。</p>
+        <div class="range-buttons size-range-buttons" aria-label="サイズグラフの表示期間">
+          <button type="button" data-size-range="90" class="size-range-btn active">3ヶ月</button>
+          <button type="button" data-size-range="180" class="size-range-btn">6ヶ月</button>
+          <button type="button" data-size-range="365" class="size-range-btn">1年</button>
+          <button type="button" data-size-range="all" class="size-range-btn">全期間</button>
+        </div>
+        <div id="size-comparison" class="size-comparison" aria-live="polite"></div>
       </section>
+      <section class="card"><h2>サイズの記録一覧</h2><p class="input-note">「編集」を押すと、その日の記録を呼び出せるよ。</p><div id="size-history" class="history-list size-history"></div></section>
+    </div>
 
-    </div><!-- /tab-stats -->
-
-    <!-- ===== ③ マイ情報タブ ===== -->
     <div id="tab-profile" class="tab-content">
-
       <section class="card">
         <h2>基本情報</h2>
-        <div class="form-row">
-          <label for="profile-height">身長 (cm)</label>
-          <input type="number" id="profile-height" step="0.1" placeholder="例: 168.0" />
-        </div>
-        <div class="form-row">
-          <label for="profile-target">目標体重 (kg)</label>
-          <input type="number" id="profile-target" step="0.1" placeholder="例: 50.0" />
-        </div>
-        <div class="form-row">
-          <label for="profile-kcal">1日の摂取カロリー目標 (kcal)</label>
-          <div class="row-inline">
-            <input type="number" id="profile-kcal" placeholder="例: 1500" />
-            <button id="auto-calc-kcal-btn" class="ghost-btn">自動計算</button>
-          </div>
-          <p class="input-note">自動計算：記録済みの体重・身長をもとにゆっくり痩せる目安を算出</p>
-        </div>
-        <button id="save-profile-btn" class="primary-btn">保存する</button>
-        <p id="profile-saved-msg" class="profile-msg"></p>
+        <div class="form-row"><label for="profile-height">身長 (cm)</label><input type="number" id="profile-height" inputmode="decimal" step="0.1" min="0.1" max="300" placeholder="例: 168.0" /></div>
+        <div class="form-row"><label for="profile-target">目標体重 (kg)</label><input type="number" id="profile-target" inputmode="decimal" step="0.1" min="0.1" max="500" placeholder="例: 60.0" /></div>
+        <button type="button" id="save-profile-btn" class="primary-btn">保存する</button>
+        <p id="profile-saved-msg" class="profile-msg" aria-live="polite"></p>
       </section>
-
-      <section class="card">
-        <h2>いまの状況</h2>
-        <div id="profile-summary"></div>
-      </section>
-
+      <section class="card"><h2>いまの状況</h2><div id="profile-summary"></div></section>
       <section class="card">
         <h2>データ管理</h2>
-        <button id="export-btn" class="ghost-btn">データを書き出す (JSON)</button>
-        <button id="import-btn" class="ghost-btn">データを読み込む</button>
-        <input type="file" id="import-file" accept="application/json" style="display:none" />
+        <p class="backup-note">体重・身体サイズ・マイ情報をまとめてバックアップできます。以前のアプリで保存したJSONも読み込めるよ。</p>
+        <div class="backup-actions"><button type="button" id="export-btn" class="ghost-btn">JSONを書き出す</button><button type="button" id="import-btn" class="ghost-btn">JSONを読み込む</button></div>
+        <input type="file" id="import-file" accept=".json,application/json" hidden />
+        <p class="input-note">※読み込み時は現在の記録を置き換えます。先に書き出しておくと安心です。</p>
       </section>
-
-    </div><!-- /tab-profile -->
-
+    </div>
   </main>
-
-  <footer>
-    <p>データはこの端末のブラウザに保存されます。</p>
-  </footer>
-
-  <script src="exercises.js"></script>
-  <script src="foods.js"></script>
-  <script src="partners.js"></script>
-  <script src="app.js"></script>
+  <footer>データはこのブラウザに保存されます。端末やブラウザを変える時はJSONを保存してね。</footer>
 </body>
 </html>
