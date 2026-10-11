@@ -7,18 +7,18 @@ const PROFILE_KEY = 'saya-diet-profile';
 const SIZE_KEY = 'saya-diet-measurements';
 
 const BODY_PARTS = [
-  { id: 'shoulder', label: '肩幅', side: 'left', top: 110 },
-  { id: 'upperArm', label: '二の腕', side: 'right', top: 163 },
-  { id: 'bust', label: 'バストトップ', side: 'left', top: 194 },
-  { id: 'underBust', label: 'アンダーバスト', side: 'right', top: 242 },
-  { id: 'forearm', label: '前腕', side: 'left', top: 276 },
-  { id: 'waist', label: 'くびれ', side: 'right', top: 326 },
-  { id: 'belly', label: 'お腹（へそ下3cm）', side: 'left', top: 360 },
-  { id: 'hips', label: 'おしり', side: 'right', top: 411 },
-  { id: 'thighUpper', label: '太もも（付け根）', side: 'left', top: 463 },
-  { id: 'thighMiddle', label: '太もも（真ん中）', side: 'right', top: 500 },
-  { id: 'calf', label: 'ふくらはぎ（真ん中）', side: 'left', top: 562 },
-  { id: 'ankle', label: '足首', side: 'right', top: 614 },
+  { id: 'shoulder', label: '肩幅', side: 'left', top: 107 },
+  { id: 'upperArm', label: '二の腕', side: 'right', top: 139 },
+  { id: 'bust', label: 'バストトップ', side: 'left', top: 183 },
+  { id: 'underBust', label: 'アンダーバスト', side: 'right', top: 215 },
+  { id: 'forearm', label: '前腕', side: 'left', top: 259 },
+  { id: 'waist', label: 'くびれ', side: 'right', top: 291 },
+  { id: 'belly', label: 'お腹（へそ下3cm）', side: 'left', top: 335 },
+  { id: 'hips', label: 'おしり', side: 'right', top: 367 },
+  { id: 'thighUpper', label: '太もも（付け根）', side: 'left', top: 411 },
+  { id: 'thighMiddle', label: '太もも（真ん中）', side: 'right', top: 443 },
+  { id: 'calf', label: 'ふくらはぎ（真ん中）', side: 'left', top: 487 },
+  { id: 'ankle', label: '足首', side: 'right', top: 519 },
 ];
 
 const $ = (id) => document.getElementById(id);
@@ -279,49 +279,47 @@ function renderStatsTab(){renderWeightDiff();renderWeightChart(document.querySel
 
 // ===== 身体サイズ =====
 // Body landmark locations relative to the illustrated body map.
+// Landmarks are percentages of the *actual rendered image*, not the CSS box.
+// The image always uses width:100% / height:auto, avoiding object-fit letterboxing.
 const BODY_LANDMARKS = {
-  shoulder: { x: 60, y: 19.5 },
-  upperArm: { x: 68, y: 27.5 },
-  bust: { x: 43, y: 30.0 },
-  underBust: { x: 55, y: 34.5 },
-  forearm: { x: 33, y: 46.0 },
-  waist: { x: 55, y: 44.0 },
-  belly: { x: 48, y: 50.0 },
-  hips: { x: 60, y: 55.5 },
-  thighUpper: { x: 43, y: 64.0 },
-  thighMiddle: { x: 56, y: 73.0 },
-  calf: { x: 44, y: 84.5 },
-  ankle: { x: 54, y: 95.0 },
+  shoulder:    { x: 66, y: 20.0 },
+  upperArm:    { x: 74, y: 28.0 },
+  bust:        { x: 40, y: 29.5 },
+  underBust:   { x: 61, y: 33.5 },
+  forearm:     { x: 18, y: 45.0 },
+  waist:       { x: 58, y: 42.0 },
+  belly:       { x: 49, y: 47.0 },
+  hips:        { x: 64, y: 51.5 },
+  thighUpper:  { x: 39, y: 58.0 },
+  thighMiddle: { x: 61, y: 68.5 },
+  calf:        { x: 39, y: 82.5 },
+  ankle:       { x: 55, y: 94.0 },
 };
 function drawBodyGuides() {
   const map = document.querySelector('.body-map');
   const svg = $('body-guide-lines');
-  const illustration = map?.querySelector('.body-illustration');
-  if (!map || !svg || !illustration) return;
+  const image = map?.querySelector('.body-illustration img');
+  if (!map || !svg || !image) return;
   const mapBox = map.getBoundingClientRect();
-  const illusBox = illustration.getBoundingClientRect();
-  if (!mapBox.width || !illusBox.width) return;
-
+  const imageBox = image.getBoundingClientRect();
+  if (!mapBox.width || !imageBox.width || !imageBox.height) return;
   svg.setAttribute('viewBox', `0 0 ${mapBox.width} ${mapBox.height}`);
   svg.setAttribute('preserveAspectRatio', 'none');
-
-  const illusLeft = illusBox.left - mapBox.left;
-  const illusTop = illusBox.top - mapBox.top;
 
   svg.innerHTML = BODY_PARTS.map(part => {
     const field = $('size-' + part.id)?.closest('.measure-field');
     const wrap = field?.querySelector('.measure-input-wrap');
     const point = BODY_LANDMARKS[part.id];
-    if (!field || !wrap || !point) return '';
-
-    const wrapBox = wrap.getBoundingClientRect();
-    const x1 = part.side === 'left' ? wrapBox.right - mapBox.left : wrapBox.left - mapBox.left;
-    const y1 = wrapBox.top - mapBox.top + (wrapBox.height / 2);
-    const x2 = illusLeft + (illusBox.width * point.x / 100);
-    const y2 = illusTop + (illusBox.height * point.y / 100);
-    const bend = part.side === 'left' ? Math.min(x1 + 16, x2 - 10) : Math.max(x1 - 16, x2 + 10);
-    return `<polyline points="${x1},${y1} ${bend},${y1} ${x2},${y2}" />` +
-      `<circle cx="${x2}" cy="${y2}" r="4" />`;
+    if (!wrap || !point) return '';
+    const box = wrap.getBoundingClientRect();
+    const x1 = (part.side === 'left' ? box.right : box.left) - mapBox.left;
+    const y1 = box.top - mapBox.top + box.height / 2;
+    const x2 = imageBox.left - mapBox.left + imageBox.width * point.x / 100;
+    const y2 = imageBox.top - mapBox.top + imageBox.height * point.y / 100;
+    // 3-point guides, with a short horizontal section clear of the input box.
+    const shortX = x1 + (part.side === 'left' ? 12 : -12);
+    return `<polyline points="${x1.toFixed(1)},${y1.toFixed(1)} ${shortX.toFixed(1)},${y1.toFixed(1)} ${x2.toFixed(1)},${y2.toFixed(1)}" />` +
+      `<circle cx="${x2.toFixed(1)}" cy="${y2.toFixed(1)}" r="3.1" />`;
   }).join('');
 }
 
