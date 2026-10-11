@@ -77,6 +77,10 @@ window.addEventListener('DOMContentLoaded', () => {
   renderWeightDiff();
   renderHistory();
   renderSizeHistory();
+  const bodyImage = document.querySelector('.body-illustration img');
+  if (bodyImage) bodyImage.addEventListener('load', () => requestAnimationFrame(drawBodyGuides));
+  window.addEventListener('resize', () => requestAnimationFrame(drawBodyGuides));
+  requestAnimationFrame(drawBodyGuides);
 });
 
 function switchTab(tab) {
@@ -275,26 +279,49 @@ function renderStatsTab(){renderWeightDiff();renderWeightChart(document.querySel
 
 // ===== 身体サイズ =====
 // Body landmark locations relative to the illustrated body map.
-const BODY_LANDMARKS = {'shoulder': [59, 150], 'upperArm': [65, 202], 'bust': [44, 218], 'underBust': [55, 252], 'forearm': [35, 330], 'waist': [55, 315], 'belly': [48, 356], 'hips': [59, 397], 'thighUpper': [44, 450], 'thighMiddle': [56, 513], 'calf': [45, 591], 'ankle': [54, 659]};
+const BODY_LANDMARKS = {
+  shoulder: { x: 60, y: 19.5 },
+  upperArm: { x: 68, y: 27.5 },
+  bust: { x: 43, y: 30.0 },
+  underBust: { x: 55, y: 34.5 },
+  forearm: { x: 33, y: 46.0 },
+  waist: { x: 55, y: 44.0 },
+  belly: { x: 48, y: 50.0 },
+  hips: { x: 60, y: 55.5 },
+  thighUpper: { x: 43, y: 64.0 },
+  thighMiddle: { x: 56, y: 73.0 },
+  calf: { x: 44, y: 84.5 },
+  ankle: { x: 54, y: 95.0 },
+};
 function drawBodyGuides() {
   const map = document.querySelector('.body-map');
   const svg = $('body-guide-lines');
-  if (!map || !svg) return;
+  const illustration = map?.querySelector('.body-illustration');
+  if (!map || !svg || !illustration) return;
   const mapBox = map.getBoundingClientRect();
-  if (!mapBox.width) return;
-  const width = mapBox.width;
-  svg.setAttribute('viewBox', `0 0 ${width} 710`);
+  const illusBox = illustration.getBoundingClientRect();
+  if (!mapBox.width || !illusBox.width) return;
+
+  svg.setAttribute('viewBox', `0 0 ${mapBox.width} ${mapBox.height}`);
+  svg.setAttribute('preserveAspectRatio', 'none');
+
+  const illusLeft = illusBox.left - mapBox.left;
+  const illusTop = illusBox.top - mapBox.top;
+
   svg.innerHTML = BODY_PARTS.map(part => {
     const field = $('size-' + part.id)?.closest('.measure-field');
-    if (!field) return '';
-    const r = field.getBoundingClientRect();
-    const x1 = part.side === 'left' ? r.right - mapBox.left : r.left - mapBox.left;
-    const y1 = part.top + 24;
-    const [px, y2] = BODY_LANDMARKS[part.id];
-    const x2 = width * px / 100;
-    const bend = part.side === 'left' ? Math.min(x1 + 10, x2) : Math.max(x1 - 10, x2);
+    const wrap = field?.querySelector('.measure-input-wrap');
+    const point = BODY_LANDMARKS[part.id];
+    if (!field || !wrap || !point) return '';
+
+    const wrapBox = wrap.getBoundingClientRect();
+    const x1 = part.side === 'left' ? wrapBox.right - mapBox.left : wrapBox.left - mapBox.left;
+    const y1 = wrapBox.top - mapBox.top + (wrapBox.height / 2);
+    const x2 = illusLeft + (illusBox.width * point.x / 100);
+    const y2 = illusTop + (illusBox.height * point.y / 100);
+    const bend = part.side === 'left' ? Math.min(x1 + 16, x2 - 10) : Math.max(x1 - 16, x2 + 10);
     return `<polyline points="${x1},${y1} ${bend},${y1} ${x2},${y2}" />` +
-      `<circle cx="${x2}" cy="${y2}" r="2.8" />`;
+      `<circle cx="${x2}" cy="${y2}" r="4" />`;
   }).join('');
 }
 
