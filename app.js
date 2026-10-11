@@ -89,7 +89,7 @@ function switchTab(tab) {
     panel.classList.toggle('active', panel.id === `tab-${tab}`);
   });
   if (tab === 'stats') renderStatsTab();
-  if (tab === 'measurements') { renderSizeChart(); renderSizeHistory(); }
+  if (tab === 'measurements') { renderSizeChart(); renderSizeHistory(); requestAnimationFrame(drawBodyGuides); }
   if (tab === 'profile') renderProfileSummary();
 }
 function initTabs() {
@@ -274,6 +274,30 @@ function renderHistory() {
 function renderStatsTab(){renderWeightDiff();renderWeightChart(document.querySelector('.range-btn.active')?.dataset.range||'7');renderHistory();}
 
 // ===== 身体サイズ =====
+// Body landmark locations relative to the illustrated body map.
+const BODY_LANDMARKS = {'shoulder': [59, 150], 'upperArm': [65, 202], 'bust': [44, 218], 'underBust': [55, 252], 'forearm': [35, 330], 'waist': [55, 315], 'belly': [48, 356], 'hips': [59, 397], 'thighUpper': [44, 450], 'thighMiddle': [56, 513], 'calf': [45, 591], 'ankle': [54, 659]};
+function drawBodyGuides() {
+  const map = document.querySelector('.body-map');
+  const svg = $('body-guide-lines');
+  if (!map || !svg) return;
+  const mapBox = map.getBoundingClientRect();
+  if (!mapBox.width) return;
+  const width = mapBox.width;
+  svg.setAttribute('viewBox', `0 0 ${width} 710`);
+  svg.innerHTML = BODY_PARTS.map(part => {
+    const field = $('size-' + part.id)?.closest('.measure-field');
+    if (!field) return '';
+    const r = field.getBoundingClientRect();
+    const x1 = part.side === 'left' ? r.right - mapBox.left : r.left - mapBox.left;
+    const y1 = part.top + 24;
+    const [px, y2] = BODY_LANDMARKS[part.id];
+    const x2 = width * px / 100;
+    const bend = part.side === 'left' ? Math.min(x1 + 10, x2) : Math.max(x1 - 10, x2);
+    return `<polyline points="${x1},${y1} ${bend},${y1} ${x2},${y2}" />` +
+      `<circle cx="${x2}" cy="${y2}" r="2.8" />`;
+  }).join('');
+}
+
 function initBodyFields() {
   $('measurement-fields').innerHTML = BODY_PARTS.map(part => `<label class="measure-field ${part.side}" style="top:${part.top}px" for="size-${part.id}">
     <span class="measure-label">${part.label}</span>
